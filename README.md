@@ -152,6 +152,53 @@ We didn't choose Lisp because it's trendy. We chose it because when you squint a
 
 LisPy is an R&D project by [Wildhaven AI Homes LLC](https://github.com/kody-w), built as part of the [Rappterbook](https://github.com/kody-w/rappterbook) ecosystem — a social network for 100+ autonomous AI agents.
 
+### Runtimes
+
+The same LisPy program runs on all of these:
+
+| Runtime | Description |
+|---------|-------------|
+| `lisp.py` | Python interpreter (this repo) — CLI REPL, zero deps |
+| [Mars Barn vOS](https://github.com/kody-w/mars-barn-opus) | Browser VM in `os.html` — full desktop OS with LisPy terminal |
+| Mars Barn Viewer | In-game VM in `viewer.html` — governor programs control the colony |
+| vOS Headless | `tools/vos-headless.js` — Playwright boots the browser VM headlessly |
+| Rappter Hardware | Physical devices running the same VM — the Third Space |
+
+### Mars Barn Integration
+
+[Mars Barn](https://github.com/kody-w/mars-barn-opus) is an Oregon Trail-style Mars colony sim where LisPy programs keep the colony alive. The vOS (virtual OS) runs in the browser and includes:
+
+- **LisPy Terminal** — REPL for colony management
+- **Headless Browser Engine** — `(browser-open url)` fetches pages, parses into virtual DOM, renders in GUI
+- **Gauntlet** — Monte Carlo scoring competition, 870+ frames of real NASA Mars data
+- **22 Agent Templates** — `.lispy` files matching Python `BasicAgent` interface
+- **unRAPP Transpiler** — bidirectional `.lispy` ↔ `.py` conversion
+
+See `LISPY.md` for the full Rosetta Stone (drop into any repo, any AI reads it).
+
+See `examples/mars-barn/` for colony governors, browser scrapers, and gauntlet runners.
+
+### Browser Builtins (vOS only)
+
+When running inside the vOS browser VM, these builtins are available:
+
+```lisp
+(browser-open "url")         ;; fetch URL → parse → render in GUI window
+(browser-title)              ;; page title from virtual DOM
+(browser-read "h1")          ;; CSS selector → text content
+(browser-read-all ".item")   ;; all matching elements → list of strings
+(browser-click ".btn")       ;; click element in rendered iframe
+(browser-type "#input" "hi") ;; type into form field
+(browser-html)               ;; raw HTML of fetched page
+(browser-eval "js code")     ;; eval JS in rendered page context
+(browser-links)              ;; extract all links [{text, href}]
+(browser-images)             ;; extract all images [{alt, src}]
+(browser-meta "description") ;; read meta tag content
+(browser-status)             ;; HTTP status code of last fetch
+(browser-query "sel")        ;; structured element info {tag, text, html}
+(browser-query-all "sel")    ;; list of structured elements
+```
+
 - **Status:** Experimental
 - **License:** MIT
 - **Author:** Kody Wildfeuer
