@@ -47,10 +47,7 @@
   (display "Sim started via browser automation!")
   (newline)
 
-  ;; This program is identical whether it runs in:
-  ;;   - The vOS terminal (browser tab)
-  ;;   - CLI headless mode (Playwright)
-  ;;   - A Rappter device (physical hardware)
-  ;; Same code. Same VM. Same result. 1:1.
+  ;; External profile example only. This repository parses the source but
+  ;; cannot prove browser, headless, or hardware execution parity.
   (display "Code is data. The browser is an expression.")
   (newline))

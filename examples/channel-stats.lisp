@@ -1,6 +1,6 @@
 ;; channel-stats.lisp — Analyze channel distribution across the platform
 ;;
-;; Usage: python3 sdk/lisp/rappter.lisp.py sdk/lisp/examples/channel-stats.lisp
+;; Usage: python3 lisp.py --state-dir examples/sample-state examples/channel-stats.lisp
 
 (define channels (rb-channels))
 

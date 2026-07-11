@@ -1,0 +1,220 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions: {}
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    env:
+      EXPECTED_DISTRIBUTION: rappterbook-lispy-runtime
+      RELEASE_BUILD_ENABLED: ${{ vars.RELEASE_BUILD_ENABLED }}
+      TESTPYPI_PUBLISH_ENABLED: ${{ vars.TESTPYPI_PUBLISH_ENABLED }}
+      PYPI_PUBLISH_ENABLED: ${{ vars.PYPI_PUBLISH_ENABLED }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Require release context and variables
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          import re
+          import lisp
+
+          expected = os.environ["EXPECTED_DISTRIBUTION"]
+          required = {
+              "GITHUB_REPOSITORY": "kody-w/lisppy",
+              "GITHUB_EVENT_NAME": "push",
+              "GITHUB_REF_TYPE": "tag",
+              "RELEASE_BUILD_ENABLED": expected,
+              "TESTPYPI_PUBLISH_ENABLED": expected,
+              "PYPI_PUBLISH_ENABLED": expected,
+          }
+          bad = [
+              name
+              for name, value in required.items()
+              if os.environ.get(name) != value
+          ]
+          if re.fullmatch(
+              r"v(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\."
+              r"(?:0|[1-9][0-9]*)",
+              os.environ.get("GITHUB_REF_NAME", ""),
+          ) is None:
+              bad.append("GITHUB_REF_NAME")
+          elif os.environ["GITHUB_REF_NAME"] != "v" + lisp.VERSION:
+              bad.append("GITHUB_REF_NAME/runtime-version")
+          for name in bad:
+              print(
+                  f"::error title=release-preflight::"
+                  f"{name} is unset or incorrect"
+              )
+          if bad:
+              raise SystemExit(1)
+          PY
+
+  build:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions: {}
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - name: Build and test release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_pin="$(
+            python lisp.py --doctor inventory@1 \
+              --doctor-mode source --json |
+            python -c 'import json,sys; print(json.load(sys.stdin)["pins"]["actual_inventory_sha256"])'
+          )"
+          contract_pin="$(
+            python -c 'from lisppy.contracts import contract_manifest; print(contract_manifest()["sha256"])'
+          )"
+          build_pin_before="$(
+            python -c 'import lisp; print(lisp.build_source_sha256())'
+          )"
+          python -m pip install build twine
+          python -m unittest discover -s tests -p "test_*.py" -v
+          python -m build
+          python -m twine check dist/*
+          source_pin_after="$(
+            python lisp.py --doctor inventory@1 \
+              --doctor-mode source --json |
+            python -c 'import json,sys; print(json.load(sys.stdin)["pins"]["actual_inventory_sha256"])'
+          )"
+          test "$source_pin" = "$source_pin_after"
+          build_pin_after="$(
+            python -c 'import lisp; print(lisp.build_source_sha256())'
+          )"
+          test "$build_pin_before" = "$build_pin_after"
+          python -m venv "$RUNNER_TEMP/wheel"
+          "$RUNNER_TEMP/wheel/bin/python" -m pip install dist/*.whl
+          (
+            cd "$RUNNER_TEMP"
+            "$RUNNER_TEMP/wheel/bin/python" -I -m lisppy \
+              --doctor release@2 --doctor-mode installed \
+              --expect-inventory "$source_pin" --json
+            "$RUNNER_TEMP/wheel/bin/python" -I -m lisppy.demo
+            "$RUNNER_TEMP/wheel/bin/python" -I -m lisppy.contracts \
+              > "$RUNNER_TEMP/wheel-contract.json"
+            "$RUNNER_TEMP/wheel/bin/python" -I -m lisppy.contracts \
+              --verify "$RUNNER_TEMP/wheel-contract.json" \
+              --expect-manifest "$contract_pin"
+          )
+          mkdir -p dist/rebuilt
+          python -m pip wheel dist/*.tar.gz \
+            --no-deps --wheel-dir dist/rebuilt
+          python -m venv "$RUNNER_TEMP/sdist"
+          "$RUNNER_TEMP/sdist/bin/python" -m pip install dist/rebuilt/*.whl
+          (
+            cd "$RUNNER_TEMP"
+            "$RUNNER_TEMP/sdist/bin/python" -I -m lisppy \
+              --doctor release@2 --doctor-mode installed \
+              --expect-inventory "$source_pin" --json
+            "$RUNNER_TEMP/sdist/bin/python" -I -m lisppy.demo
+            "$RUNNER_TEMP/sdist/bin/python" -I -m lisppy.contracts \
+              > "$RUNNER_TEMP/sdist-contract.json"
+            "$RUNNER_TEMP/sdist/bin/python" -I -m lisppy.contracts \
+              --verify "$RUNNER_TEMP/sdist-contract.json" \
+              --expect-manifest "$contract_pin"
+          )
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+
+          files = sorted([
+              *Path("dist").glob("*.whl"),
+              *Path("dist").glob("*.tar.gz"),
+          ])
+          if len(files) != 2:
+              raise SystemExit("expected exactly two release files")
+          with Path("SHA256SUMS").open("w", encoding="utf-8") as output:
+              for path in files:
+                  digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                  output.write(f"{digest}  {path.as_posix()}\n")
+          PY
+      - name: Upload tested artifacts
+        id: upload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-${{ github.ref_name }}
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+            SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-testpypi:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: .
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist
+          skip-existing: false
+
+  verify-testpypi:
+    needs: [build, publish-testpypi]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions: {}
+    env:
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: .
+          merge-multiple: true
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+      - name: Verify TestPyPI file digests
+        run: python .github/scripts/verify_testpypi.py
+
+  publish-pypi:
+    needs: [build, verify-testpypi]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact_id }}
+          path: .
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b
+        with:
+          packages-dir: dist
+          skip-existing: false

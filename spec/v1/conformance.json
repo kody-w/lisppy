@@ -1,0 +1,318 @@
+{
+  "schema": "lispy-conformance@2",
+  "wire": "lispy-value@1",
+  "profile": "lispy-core@1",
+  "cases": [
+    {
+      "id": "arithmetic.variadic-add",
+      "source": "(+ 1 2 3)",
+      "expect": {
+        "value": {"tag": "integer", "value": "6"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "truth.true-alias",
+      "source": "(if true 1 2)",
+      "expect": {
+        "value": {"tag": "integer", "value": "1"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "scope.lexical-closure",
+      "source": "(((lambda (x) (lambda (y) (+ x y))) 2) 3)",
+      "expect": {
+        "value": {"tag": "integer", "value": "5"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "logic.short-circuit",
+      "source": "(and #f (error \"must not run\"))",
+      "expect": {
+        "value": {"tag": "boolean", "value": false},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "truth.zero-is-truthy",
+      "source": "(filter (lambda (x) 0) (list 1 2))",
+      "expect": {
+        "value": {
+          "tag": "list",
+          "items": [
+            {"tag": "integer", "value": "1"},
+            {"tag": "integer", "value": "2"}
+          ]
+        },
+        "stdout": ""
+      }
+    },
+    {
+      "id": "stdlib.identity",
+      "source": "(identity 7)",
+      "expect": {
+        "value": {"tag": "integer", "value": "7"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "stdlib.dotted-rest",
+      "source": "((partial + 1) 2 3)",
+      "expect": {
+        "value": {"tag": "integer", "value": "6"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "higher-order.compose",
+      "source": "((compose (lambda (x) (+ x 1)) (lambda (x) (* x 2))) 3)",
+      "expect": {
+        "value": {"tag": "integer", "value": "7"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "data.zip",
+      "source": "(zip (list 1 2) (list 3 4))",
+      "expect": {
+        "value": {
+          "tag": "list",
+          "items": [
+            {
+              "tag": "list",
+              "items": [
+                {"tag": "integer", "value": "1"},
+                {"tag": "integer", "value": "3"}
+              ]
+            },
+            {
+              "tag": "list",
+              "items": [
+                {"tag": "integer", "value": "2"},
+                {"tag": "integer", "value": "4"}
+              ]
+            }
+          ]
+        },
+        "stdout": ""
+      }
+    },
+    {
+      "id": "wire.distinct-values",
+      "source": "(list nil '() 'x \"x\" (cons 1 2))",
+      "expect": {
+        "value": {
+          "tag": "list",
+          "items": [
+            {"tag": "nil"},
+            {"tag": "list", "items": []},
+            {"tag": "symbol", "value": "x"},
+            {"tag": "string", "value": "x"},
+            {
+              "tag": "pair",
+              "car": {"tag": "integer", "value": "1"},
+              "cdr": {"tag": "integer", "value": "2"}
+            }
+          ]
+        },
+        "stdout": ""
+      }
+    },
+    {
+      "id": "numbers.large-integer",
+      "source": "9007199254740993",
+      "expect": {
+        "value": {"tag": "integer", "value": "9007199254740993"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "numbers.negative-zero",
+      "source": "-0.0",
+      "expect": {
+        "value": {"tag": "float64", "bits": "8000000000000000"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "equality.boolean-number-distinct",
+      "source": "(equal? #t 1)",
+      "expect": {
+        "value": {"tag": "boolean", "value": false},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "equality.symbol-string-distinct",
+      "source": "(equal? 'x \"x\")",
+      "expect": {
+        "value": {"tag": "boolean", "value": false},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "equality.pair-structural",
+      "source": "(equal? (cons 1 (cons 2 nil)) (cons 1 (cons 2 nil)))",
+      "expect": {
+        "value": {"tag": "boolean", "value": true},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "sequence.map-proper-pair",
+      "source": "(map (lambda (x) (+ x 1)) (cons 1 (cons 2 nil)))",
+      "expect": {
+        "value": {
+          "tag": "list",
+          "items": [
+            {"tag": "integer", "value": "2"},
+            {"tag": "integer", "value": "3"}
+          ]
+        },
+        "stdout": ""
+      }
+    },
+    {
+      "id": "sequence.map-nil",
+      "source": "(map identity nil)",
+      "expect": {
+        "value": {"tag": "list", "items": []},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "sequence.reduce-nil",
+      "source": "(reduce + nil 7)",
+      "expect": {
+        "value": {"tag": "integer", "value": "7"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "sequence.apply-nil",
+      "source": "(apply list nil)",
+      "expect": {
+        "value": {"tag": "list", "items": []},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "sequence.reject-improper",
+      "source": "(map identity (cons 1 2))",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "output.exact",
+      "source": "(begin (display \"A\") (newline) (display \"β\") 7)",
+      "expect": {
+        "value": {"tag": "integer", "value": "7"},
+        "stdout": "A\nβ"
+      }
+    },
+    {
+      "id": "output.before-error",
+      "source": "(begin (display \"before\") (error \"boom\"))",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": "before"
+      }
+    },
+    {
+      "id": "errors.unsupported-do",
+      "source": "(do 1 2)",
+      "expect": {
+        "error": {"category": "unsupported"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "reader.unterminated-string",
+      "source": "\"unterminated",
+      "expect": {
+        "error": {"category": "syntax"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "json.reject-non-finite",
+      "source": "(json-parse \"NaN\")",
+      "expect": {
+        "error": {"category": "invalid-data"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "numeric.reject-boolean",
+      "source": "(+ #t 1)",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "numeric.reject-string-multiplication",
+      "source": "(* \"x\" 3)",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "numeric.reject-complex-domain",
+      "source": "(expt -1 0.5)",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "map.canonical-string-keys",
+      "source": "(make-dict \"b\" 2 \"a\" 1)",
+      "expect": {
+        "value": {
+          "tag": "map",
+          "entries": [
+            [
+              {"tag": "string", "value": "a"},
+              {"tag": "integer", "value": "1"}
+            ],
+            [
+              {"tag": "string", "value": "b"},
+              {"tag": "integer", "value": "2"}
+            ]
+          ]
+        },
+        "stdout": ""
+      }
+    },
+    {
+      "id": "map.reject-non-string-key",
+      "source": "(make-dict #t 1)",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "map.reject-odd-arity",
+      "source": "(make-dict \"a\" 1 \"b\")",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "sequence.reject-fractional-index",
+      "source": "(get (list 10 20) 1.5)",
+      "expect": {
+        "error": {"category": "evaluation"},
+        "stdout": ""
+      }
+    }
+  ]
+}

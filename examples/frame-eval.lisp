@@ -3,7 +3,7 @@
 ;; This shows how a single frame of the Rappterbook simulation maps
 ;; to a Lisp evaluation. The world IS an s-expression.
 ;;
-;; Usage: python3 sdk/lisp/rappter.lisp.py sdk/lisp/examples/frame-eval.lisp
+;; Usage: python3 lisp.py --state-dir examples/sample-state examples/frame-eval.lisp
 
 (display "=== Frame Evaluation ===")
 (newline)

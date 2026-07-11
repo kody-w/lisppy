@@ -1,0 +1,118 @@
+{
+  "schema": "lispy-examples@2",
+  "proof_levels": [
+    "local-executed",
+    "external-unverified"
+  ],
+  "profiles": {
+    "lispy-core@1": {
+      "runtime": "python-cli",
+      "proof": "local-executed"
+    },
+    "lispy-core@1+rappterbook.read": {
+      "runtime": "python-cli",
+      "proof": "local-executed"
+    },
+    "hosted-flow@2": {
+      "runtime": "python-example",
+      "proof": "local-executed"
+    },
+    "hosted-governor@2": {
+      "runtime": "python-hosted",
+      "proof": "local-executed"
+    },
+    "mars-governor-candidate@2": {
+      "runtime": "python-hosted",
+      "proof": "local-executed",
+      "external_target": "mars-barn-viewer",
+      "external_status": "unverified-incompatible"
+    },
+    "mars-browser-external@1": {
+      "runtime": "mars-barn-vos",
+      "proof": "external-unverified"
+    },
+    "mars-score-preview-external@1": {
+      "runtime": "mars-barn-sim",
+      "proof": "external-unverified"
+    }
+  },
+  "examples": [
+    {
+      "path": "examples/hello.lisp",
+      "runtime": "python-cli",
+      "profile": "lispy-core@1",
+      "proof": "local-executed"
+    },
+    {
+      "path": "examples/agent-profile.lisp",
+      "runtime": "python-cli",
+      "profile": "lispy-core@1+rappterbook.read",
+      "proof": "local-executed",
+      "state_dir": "examples/sample-state"
+    },
+    {
+      "path": "examples/channel-stats.lisp",
+      "runtime": "python-cli",
+      "profile": "lispy-core@1+rappterbook.read",
+      "proof": "local-executed",
+      "state_dir": "examples/sample-state"
+    },
+    {
+      "path": "examples/data-slosh.lisp",
+      "runtime": "python-cli",
+      "profile": "lispy-core@1+rappterbook.read",
+      "proof": "local-executed",
+      "state_dir": "examples/sample-state"
+    },
+    {
+      "path": "examples/frame-eval.lisp",
+      "runtime": "python-cli",
+      "profile": "lispy-core@1+rappterbook.read",
+      "proof": "local-executed",
+      "state_dir": "examples/sample-state"
+    },
+    {
+      "path": "examples/trending.lisp",
+      "runtime": "python-cli",
+      "profile": "lispy-core@1+rappterbook.read",
+      "proof": "local-executed",
+      "state_dir": "examples/sample-state"
+    },
+    {
+      "path": "examples/hosted-flow.py",
+      "runtime": "python-example",
+      "profile": "hosted-flow@2",
+      "proof": "local-executed"
+    },
+    {
+      "path": "examples/hosted-governor.lisp",
+      "runtime": "python-hosted",
+      "profile": "hosted-governor@2",
+      "proof": "local-executed",
+      "source_id": "lispy/hosted-doctor@1",
+      "contract_id": "mars-barn/governor-controls@1"
+    },
+    {
+      "path": "examples/mars-barn/browser-scraper.lisp",
+      "runtime": "mars-barn-vos",
+      "profile": "mars-browser-external@1",
+      "proof": "external-unverified"
+    },
+    {
+      "path": "examples/mars-barn/gauntlet-runner.lisp",
+      "runtime": "mars-barn-sim",
+      "profile": "mars-score-preview-external@1",
+      "proof": "external-unverified"
+    },
+    {
+      "path": "examples/mars-barn/mars-colony-governor.lisp",
+      "runtime": "python-hosted",
+      "profile": "mars-governor-candidate@2",
+      "proof": "local-executed",
+      "source_id": "mars-barn/governor-example",
+      "contract_id": "mars-barn/governor-controls@1",
+      "external_target": "mars-barn-viewer",
+      "external_status": "unverified-incompatible"
+    }
+  ]
+}

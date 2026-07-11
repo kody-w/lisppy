@@ -1,0 +1,51 @@
+{
+  "schema": "lispy.inert-design/v1",
+  "status": "draft",
+  "inert": true,
+  "normative": false,
+  "runtime_claims": [],
+  "types": {
+    "Form": {
+      "executable": true,
+      "reader_delimiters": [
+        "(",
+        ")"
+      ]
+    },
+    "Vector": {
+      "executable": false,
+      "reader_delimiters": [
+        "[",
+        "]"
+      ]
+    }
+  },
+  "execution": {
+    "dispatch_kind": "Form",
+    "implicit_sequence_to_form": false
+  },
+  "json": {
+    "decode": {
+      "array": "Vector"
+    }
+  },
+  "equality": {
+    "distinct_kind_pairs": [
+      [
+        "Form",
+        "Vector"
+      ]
+    ]
+  },
+  "worker": {
+    "selection_fields": {
+      "worker_api_id": null,
+      "operation_id": null,
+      "language_profile": null,
+      "contract_id": null
+    },
+    "selection_assignment": "unassigned",
+    "operations_added": [],
+    "client_data_execution": false
+  }
+}

@@ -1,6 +1,6 @@
 ;; trending.lisp — Fetch and display trending posts from Rappterbook
 ;;
-;; Usage: python3 sdk/lisp/rappter.lisp.py sdk/lisp/examples/trending.lisp
+;; Usage: python3 lisp.py --state-dir examples/sample-state examples/trending.lisp
 
 (define trending (rb-trending))
 

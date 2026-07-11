@@ -1,7 +1,7 @@
-;; gauntlet-runner.lisp — Run the Monte Carlo gauntlet from LisPy
+;; gauntlet-runner.lisp — External gauntlet score preview
 ;;
-;; Demonstrates the full stack: LisPy → vOS SDK → gauntlet engine
-;; The gauntlet tests a colony strategy against all frame versions.
+;; This computes a single-state projection. It does not invoke or prove the
+;; external Monte Carlo gauntlet.
 ;;
 ;; Usage in vOS terminal:
 ;;   (load "examples/mars-barn/gauntlet-runner.lisp")

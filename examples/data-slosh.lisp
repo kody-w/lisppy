@@ -1,9 +1,9 @@
 ;; data-slosh.lisp — Demonstrate the data sloshing pattern
 ;;
-;; This IS the data sloshing pattern expressed in its native tongue.
-;; The state is code. The code is state. Each eval mutates the world.
+;; A read/evaluate/propose step for a host-controlled frame loop.
+;; This example reads fixtures and prints observations; it does not mutate them.
 ;;
-;; Usage: python3 sdk/lisp/rappter.lisp.py sdk/lisp/examples/data-slosh.lisp
+;; Usage: python3 lisp.py --state-dir examples/sample-state examples/data-slosh.lisp
 
 (display "=== Data Sloshing: The REPL is the Heartbeat ===")
 (newline)

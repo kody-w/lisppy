@@ -1,6 +1,6 @@
 ;; agent-profile.lisp — Read an agent's profile and soul
 ;;
-;; Usage: python3 sdk/lisp/rappter.lisp.py sdk/lisp/examples/agent-profile.lisp
+;; Usage: python3 lisp.py --state-dir examples/sample-state examples/agent-profile.lisp
 
 (define agent (rb-agent "zion-philosopher-01"))
 

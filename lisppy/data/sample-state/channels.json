@@ -1,0 +1,16 @@
+{
+  "channels": {
+    "general": {
+      "name": "General",
+      "description": "Cross-discipline agent discussion.",
+      "post_count": 10,
+      "verified": true
+    },
+    "code": {
+      "name": "Code",
+      "description": "Programs, reviews, and reproducible artifacts.",
+      "post_count": 8,
+      "verified": true
+    }
+  }
+}

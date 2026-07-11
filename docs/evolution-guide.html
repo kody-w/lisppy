@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Why LisPy v0.22 matters and where the project goes next.">
+  <title>LisPy v0.22 - Evolution Guide</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b12;
+      --panel: #111726;
+      --panel-2: #171f31;
+      --text: #f5f7ff;
+      --muted: #a8b1c7;
+      --line: #2b3650;
+      --green: #69f0ae;
+      --cyan: #5ce1e6;
+      --violet: #b49cff;
+      --gold: #ffd166;
+      --danger: #ff7b89;
+      --shadow: 0 20px 60px rgba(0, 0, 0, .35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(92, 225, 230, .16), transparent 30rem),
+        radial-gradient(circle at 88% 8%, rgba(180, 156, 255, .14), transparent 28rem),
+        var(--bg);
+      line-height: 1.65;
+    }
+
+    a { color: var(--cyan); }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+      background: rgba(8, 11, 18, .86);
+      backdrop-filter: blur(16px);
+    }
+
+    nav .shell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 62px;
+      gap: 24px;
+    }
+
+    .brand {
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: .9rem;
+      text-decoration: none;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    header {
+      padding: 92px 0 54px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin: 16px 0 22px;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      line-height: .96;
+      letter-spacing: -.065em;
+    }
+
+    .gradient {
+      color: transparent;
+      background: linear-gradient(90deg, var(--cyan), var(--green), var(--violet));
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .lede {
+      max-width: 800px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1.08rem, 2.2vw, 1.35rem);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--text);
+      background: var(--panel);
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: var(--shadow);
+    }
+
+    .button.primary {
+      border-color: transparent;
+      color: #06130d;
+      background: var(--green);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 36px 0 72px;
+    }
+
+    .stat, .card, .diagram, .code-card, .roadmap-item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(23, 31, 49, .94), rgba(17, 23, 38, .94));
+      box-shadow: var(--shadow);
+    }
+
+    .stat { padding: 22px; }
+    .stat strong {
+      display: block;
+      color: var(--green);
+      font-size: 2rem;
+      letter-spacing: -.04em;
+    }
+    .stat span { color: var(--muted); }
+
+    section { padding: 48px 0; }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3.3rem);
+      letter-spacing: -.045em;
+    }
+
+    .section-intro {
+      max-width: 760px;
+      margin: 0 0 30px;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .card { padding: 26px; }
+    .card h3 { margin: 0 0 8px; font-size: 1.25rem; }
+    .card p { margin: 0; color: var(--muted); }
+
+    .number {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 18px;
+      border-radius: 10px;
+      color: #07121a;
+      background: var(--cyan);
+      font-weight: 900;
+    }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: stretch;
+      gap: 12px;
+      padding: 22px;
+      overflow-x: auto;
+    }
+
+    .node {
+      position: relative;
+      min-width: 150px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+    }
+
+    .node:not(:last-child)::after {
+      content: ">";
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      z-index: 2;
+      width: 12px;
+      color: var(--green);
+      font-weight: 900;
+      transform: translateY(-50%);
+    }
+
+    .node b { display: block; margin-bottom: 6px; }
+    .node small { color: var(--muted); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    th, td {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { color: var(--cyan); background: var(--panel-2); }
+    td { color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+
+    .code-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .code-card { overflow: hidden; }
+    .code-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--panel-2);
+      font-size: .86rem;
+    }
+
+    pre {
+      min-height: 118px;
+      margin: 0;
+      padding: 18px;
+      overflow: auto;
+      color: #dce6ff;
+      font-size: .88rem;
+      line-height: 1.6;
+    }
+
+    .copy {
+      border: 0;
+      color: var(--cyan);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .roadmap {
+      display: grid;
+      gap: 14px;
+    }
+
+    .roadmap-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 20px;
+      padding: 24px;
+    }
+
+    .phase {
+      color: var(--gold);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .roadmap-item h3 { margin: 0 0 6px; }
+    .roadmap-item p { margin: 0; color: var(--muted); }
+
+    .callout {
+      margin-top: 24px;
+      padding: 22px 24px;
+      border: 1px solid rgba(105, 240, 174, .45);
+      border-radius: 16px;
+      background: rgba(105, 240, 174, .08);
+    }
+
+    footer {
+      padding: 50px 0 70px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 820px) {
+      .stats, .grid, .code-grid { grid-template-columns: 1fr 1fr; }
+      .diagram { grid-template-columns: repeat(5, minmax(170px, 1fr)); }
+      .roadmap-item { grid-template-columns: 1fr; gap: 6px; }
+    }
+
+    @media (max-width: 560px) {
+      nav .shell { align-items: flex-start; flex-direction: column; padding: 14px 0; }
+      .stats, .grid, .code-grid { grid-template-columns: 1fr; }
+      header { padding-top: 64px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="shell">
+      <a class="brand" href="#top">LisPy / v0.22</a>
+      <div class="nav-links">
+        <a href="#why">Why it matters</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#proof">Proof</a>
+        <a href="#next">Next</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top" class="shell">
+    <header>
+      <div class="eyebrow">Release evolution guide</div>
+      <h1>LisPy grew from a clever interpreter into a <span class="gradient">trustworthy agent runtime.</span></h1>
+      <p class="lede">
+        The cool part is not merely "more Lisp." LisPy now separates evaluation,
+        authority, effects, evidence, and release identity so an agent can propose
+        work without silently acquiring the power to apply it.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/kody-w/lisppy">Open public repository</a>
+        <a class="button" href="../README.md">Read the README</a>
+        <a class="button" href="../CHANGELOG.md">See the changelog</a>
+      </div>
+    </header>
+
+    <div class="stats" aria-label="Release metrics">
+      <div class="stat"><strong>170</strong><span>automated tests</span></div>
+      <div class="stat"><strong>0</strong><span>runtime dependencies</span></div>
+      <div class="stat"><strong>2</strong><span>verified artifact forms</span></div>
+      <div class="stat"><strong>1</strong><span>canonical Core contract</span></div>
+    </div>
+
+    <section id="why">
+      <h2>Why these improvements are cool</h2>
+      <p class="section-intro">
+        Each improvement closes a real trust gap. Together they make LisPy useful
+        as a small, inspectable control plane for agent behavior.
+      </p>
+      <div class="grid">
+        <article class="card">
+          <div class="number">1</div>
+          <h3>The language contract travels with the runtime</h3>
+          <p>
+            Contract-pack v2 embeds the exact Core corpus, wire specification,
+            profile, documentation, and stdlib. A second runtime can verify every
+            byte and pin the manifest before claiming compatibility.
+          </p>
+        </article>
+        <article class="card">
+          <div class="number">2</div>
+          <h3>Governors propose; hosts retain authority</h3>
+          <p>
+            Registered governors are source-pinned and contract-validated.
+            Hosted-frame v2 commits outputs only after effect execution evidence
+            is complete; uncertain execution requires reconciliation.
+          </p>
+        </article>
+        <article class="card">
+          <div class="number">3</div>
+          <h3>Effects are idempotent and fail closed</h3>
+          <p>
+            In-memory and SQLite stores track reservation, execution, application,
+            and uncertainty. Replays report duplicates without invoking adapters
+            again, while malformed receipts cannot commit candidate state.
+          </p>
+        </article>
+        <article class="card">
+          <div class="number">4</div>
+          <h3>Release evidence matches shipped bytes</h3>
+          <p>
+            Wheel and sdist-derived installs run the same doctors, demo, contract
+            verification, replay checks, and closed RECORD policy. Build inputs
+            are pinned before and after packaging.
+          </p>
+        </article>
+        <article class="card">
+          <div class="number">5</div>
+          <h3>Python leakage became explicit LisPy behavior</h3>
+          <p>
+            Numeric coercions, ambiguous map keys, improper indexes, malformed
+            strings, invalid UTF-8, and collection-limit bypasses now become stable
+            LisPy errors instead of host exceptions or silent corruption.
+          </p>
+        </article>
+        <article class="card">
+          <div class="number">6</div>
+          <h3>Mars claims are honest and useful</h3>
+          <p>
+            The local Mars candidate has a total branch policy and full control
+            writes, while browser, viewer, and official gauntlet compatibility
+            remain explicitly external and unverified.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>The new trust architecture</h2>
+      <p class="section-intro">
+        This is the essential product loop. Every boundary has a distinct job and
+        a machine-verifiable receipt.
+      </p>
+      <div class="diagram" role="img" aria-label="Host state to registered governor to proposal to effect executor to committed state">
+        <div class="node"><b>Host state</b><small>JSON-compatible inputs and declared mutable outputs</small></div>
+        <div class="node"><b>Registered governor</b><small>Source hash, required inputs, validator, effect allowlist</small></div>
+        <div class="node"><b>Candidate proposal</b><small>Transactional outputs plus typed dry-run effects</small></div>
+        <div class="node"><b>Effect executor</b><small>Atomic reservation, adapter evidence, idempotent replay</small></div>
+        <div class="node"><b>Commit or reconcile</b><small>Outputs commit only when execution evidence is complete</small></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Before and after</h2>
+      <p class="section-intro">The project kept its tiny-runtime character while changing its operational meaning.</p>
+      <table>
+        <thead>
+          <tr><th>Earlier prototype</th><th>v0.22 runtime</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>README promises outran executable behavior.</td><td>Claims map to tests, proof levels, manifests, hashes, and doctors.</td></tr>
+          <tr><td>State and action language blurred together.</td><td>Inputs, candidate outputs, dry-run effects, and host application are separate.</td></tr>
+          <tr><td>Python coercions leaked through Lisp builtins.</td><td>Finite numeric grammar, string-key maps, exact indexes, and stable errors.</td></tr>
+          <tr><td>Examples implied external Mars parity.</td><td>Local evidence and external-unverified targets are labeled independently.</td></tr>
+          <tr><td>A package could build without proving its installed form.</td><td>Direct wheel and sdist-derived wheel run pinned release doctors.</td></tr>
+          <tr><td>Contract integrity meant trusting repository files.</td><td>Installed contract packs are self-contained, bounded, semantically validated, and externally pinnable.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="proof">
+      <h2>Try the proof yourself</h2>
+      <p class="section-intro">These commands exercise the exact paths that make the release meaningful.</p>
+      <div class="code-grid">
+        <div class="code-card">
+          <div class="code-title"><span>Run the complete hosted flow</span><button class="copy">copy</button></div>
+          <pre>python3 -m lisppy.demo</pre>
+        </div>
+        <div class="code-card">
+          <div class="code-title"><span>Export and verify Core 1</span><button class="copy">copy</button></div>
+          <pre>python3 -m lisppy.contracts &gt; core.json
+python3 -m lisppy.contracts --verify core.json</pre>
+        </div>
+        <div class="code-card">
+          <div class="code-title"><span>Run release evidence</span><button class="copy">copy</button></div>
+          <pre>python3 lisp.py --doctor release@2 \
+  --doctor-mode source --json</pre>
+        </div>
+        <div class="code-card">
+          <div class="code-title"><span>Run the full suite</span><button class="copy">copy</button></div>
+          <pre>python3 -m unittest discover \
+  -s tests -p 'test_*.py' -q</pre>
+        </div>
+      </div>
+      <div class="callout">
+        <b>Current proof:</b> 170 source tests, 170 extracted-sdist tests,
+        direct-wheel and rebuilt-wheel release doctors, installed demo and
+        contract verification, pinned replay, strict metadata, and workflow checks.
+      </div>
+    </section>
+
+    <section id="next">
+      <h2>Where we go from here</h2>
+      <p class="section-intro">
+        The next phase should deepen operations instead of adding language surface.
+        Keep Core 2 and external parity deferred until these foundations are adopted.
+      </p>
+      <div class="roadmap">
+        <article class="roadmap-item">
+          <div class="phase">Next</div>
+          <div>
+            <h3>Ship the first reproducible public release</h3>
+            <p>Run the checked-in matrix from the published commit, tag it, publish to TestPyPI, verify server-side digests, then promote the same bytes to PyPI.</p>
+          </div>
+        </article>
+        <article class="roadmap-item">
+          <div class="phase">Then</div>
+          <div>
+            <h3>Add operator-owned effect reconciliation</h3>
+            <p>Expose read-only claim inspection and fingerprint-bound compare-and-set resolution for interrupted SQLite effects. Never auto-retry uncertain external calls.</p>
+          </div>
+        </article>
+        <article class="roadmap-item">
+          <div class="phase">Then</div>
+          <div>
+            <h3>Publish reusable Mars policy vectors</h3>
+            <p>Turn threshold, precedence, rollback, and output-invariant cases into a packaged contract that another runtime can execute without claiming viewer parity.</p>
+          </div>
+        </article>
+        <article class="roadmap-item">
+          <div class="phase">Later</div>
+          <div>
+            <h3>Collect external conformance receipts</h3>
+            <p>Let browser or hardware runtimes run the pinned Core pack and return attributable receipts. Promote a target from unverified only when the evidence exists.</p>
+          </div>
+        </article>
+        <article class="roadmap-item">
+          <div class="phase">Defer</div>
+          <div>
+            <h3>Core 2, generic plugins, and exactly-once claims</h3>
+            <p>Those ideas are valuable, but they should not outrun the proven Core 1 contract, effect lifecycle, or real adopter requirements.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <p>LisPy v0.22 - small enough to understand, strict enough to trust.</p>
+  </footer>
+
+  <script>
+    for (const button of document.querySelectorAll(".copy")) {
+      button.addEventListener("click", async () => {
+        const text = button.closest(".code-card").querySelector("pre").innerText;
+        await navigator.clipboard.writeText(text);
+        const original = button.textContent;
+        button.textContent = "copied";
+        setTimeout(() => button.textContent = original, 1200);
+      });
+    }
+  </script>
+</body>
+</html>

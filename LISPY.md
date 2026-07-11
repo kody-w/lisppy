@@ -1,7 +1,7 @@
 ;; ═══════════════════════════════════════════════════════════════
-;; LISPY ROSETTA STONE — Drop this file into any repo.
-;; Any AI that reads it immediately understands the full language.
-;; No docs needed. This IS the docs. Every feature, one file.
+;; LISPY ROSETTA STONE — Mars Barn vOS profile.
+;; This file documents the browser/simulation dialect. It is not the
+;; portable Python contract. See spec/v1/ for lispy-core@1 semantics.
 ;; ═══════════════════════════════════════════════════════════════
 
 ;; ── 1. BASICS: Values and Variables ──
@@ -208,7 +208,7 @@
 
 
 ;; ── 14. AGENT INTERFACE ──
-;; Every .lispy agent follows this contract:
+;; Agents targeting this external Mars profile follow this contract:
 
 (begin
   ;; Identity (required)
@@ -227,7 +227,7 @@
 ;; The .lispy file IS the .py file's perform() body, unwrapped.
 ;; unRAPP converts between them automatically:
 ;;   basic_agent.py  ↔  basic_agent.lispy
-;;   Same name. Same logic. Different runtime.
+;;   Similar intent across runtimes; semantic parity must be verified.
 ;;   The user carries whichever they prefer.
 
 
@@ -281,13 +281,12 @@
 ;; and generate new programs using the same syntax. The code is a
 ;; list of lists — the AST is the source code.
 ;;
-;; Same VM runs in: browser (viewer.html), CLI (node/python),
-;; physical hardware (Rappter), LisPy OS (os.html), and inside
-;; the sim (agents). A program written anywhere runs everywhere. 1:1.
+;; Target runtimes include browser, CLI, hardware, LisPy OS, and the sim.
+;; A runtime may claim portability only after passing the versioned
+;; lispy-core conformance corpus.
 ;;
-;; unRAPP: .py ↔ .lispy — same agent, different runtime.
-;; The user carries whichever format they prefer.
-;; The runtime handles the rest.
+;; unRAPP: .py ↔ .lispy is an external translation workflow.
+;; Generated programs still require target-profile validation.
 ;;
-;; Drop this file into any repo. Any AI reads it. Full language.
+;; Drop this file into a Mars Barn repo as its vOS profile reference.
 ;; ═══════════════════════════════════════════════════════════════
