@@ -3,5 +3,16 @@
   "profile": "lispy-core@1",
   "corpus": "lispy-conformance@2",
   "wire": "lispy-value@1",
-  "status": "implemented-reference"
+  "status": "implemented-reference",
+  "stdlib": {
+    "resource": "stdlib.lisp",
+    "kind": "portable-core",
+    "exports": [
+      "identity",
+      "constantly",
+      "complement",
+      "partial"
+    ]
+  },
+  "host_extensions": "excluded"
 }

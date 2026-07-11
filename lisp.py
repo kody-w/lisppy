@@ -42,11 +42,12 @@ from typing import Any
 # Configuration
 # ---------------------------------------------------------------------------
 
-VERSION = "0.22.0"
+VERSION = "0.24.0"
 LANGUAGE_PROFILE = "lispy-core@1"
 DISTRIBUTION_NAME = "rappterbook-lispy-runtime"
 REPO_ROOT = Path(__file__).resolve().parent
 STDLIB_PATH = REPO_ROOT / "stdlib.lisp"
+CORE_STDLIB_PATH = REPO_ROOT / "core-stdlib.lisp"
 MAX_STATE_BYTES = 8_388_608
 
 
@@ -1631,15 +1632,17 @@ def _string_to_number(value):
         raise LispError(f"not a number: {value}")
 
 
-def _load_stdlib(env: Env) -> None:
+def _load_stdlib(env: Env, profile: str) -> None:
+    resource = "core-stdlib.lisp" if profile == "core" else "stdlib.lisp"
+    fallback = CORE_STDLIB_PATH if profile == "core" else STDLIB_PATH
     try:
-        source = _resource_text("stdlib.lisp", STDLIB_PATH)
+        source = _resource_text(resource, fallback)
     except OSError as exc:
-        raise LispError(f"cannot load standard library {STDLIB_PATH}: {exc}")
+        raise LispError(f"cannot load standard library {fallback}: {exc}")
     source_name = (
-        str(STDLIB_PATH)
-        if STDLIB_PATH.exists()
-        else "<package:stdlib.lisp>"
+        str(fallback)
+        if fallback.exists()
+        else f"<package:{resource}>"
     )
     for expr in parse(source, source_name=source_name):
         evaluate(expr, env)
@@ -1650,10 +1653,16 @@ def make_global_env(
     trusted: bool = False,
     load_stdlib: bool = True,
     limits: ExecutionLimits | None = None,
+    profile: str = "default",
     output=None,
     state_dir: str | Path | None = None,
 ) -> Env:
     """Create a core environment with explicit host capabilities."""
+    if profile not in ("core", "default"):
+        raise LispError(f"unknown runtime profile: {profile}")
+    if profile == "core" and trusted:
+        raise LispError("the core profile cannot grant trusted host capabilities")
+    host_profile = profile == "default"
     context = ExecutionContext(limits)
     if output is None:
         writer = BoundedWriter(
@@ -1857,14 +1866,15 @@ def make_global_env(
         env.writer, " ".join(display_value(x) for x in args)
     )
 
-    if trusted:
-        env["read-file"] = lambda path: _read_file(path)
-        env["write-file"] = lambda path, content: _write_file(path, content)
-        env["file-exists?"] = lambda path: Path(path).exists()
-    else:
-        env["read-file"] = _denied("filesystem.read")
-        env["write-file"] = _denied("filesystem.write")
-        env["file-exists?"] = _denied("filesystem.read")
+    if host_profile:
+        if trusted:
+            env["read-file"] = lambda path: _read_file(path)
+            env["write-file"] = lambda path, content: _write_file(path, content)
+            env["file-exists?"] = lambda path: Path(path).exists()
+        else:
+            env["read-file"] = _denied("filesystem.read")
+            env["write-file"] = _denied("filesystem.write")
+            env["file-exists?"] = _denied("filesystem.read")
 
     # -- JSON --
     env["json-parse"] = lambda source: _json_parse(
@@ -1883,21 +1893,22 @@ def make_global_env(
     env["sexp->json"] = env["json-dump"]
 
     # -- Rappterbook bindings --
-    env["rb-state"] = lambda filename: rb_state(
-        filename, state_dir=state_root
-    )
-    env["rb-agent"] = lambda agent_id: rb_agent(
-        agent_id, state_dir=state_root
-    )
-    env["rb-soul"] = lambda agent_id: rb_soul(
-        agent_id, state_dir=state_root
-    )
-    env["rb-channels"] = lambda: rb_channels(state_dir=state_root)
-    env["rb-trending"] = lambda: rb_trending(state_dir=state_root)
-    env["rb-post"] = rb_post
-    env["rb-comment"] = rb_comment
-    env["rb-react"] = rb_react
-    env["rb-run"] = rb_run if trusted else _denied("process.python")
+    if host_profile:
+        env["rb-state"] = lambda filename: rb_state(
+            filename, state_dir=state_root
+        )
+        env["rb-agent"] = lambda agent_id: rb_agent(
+            agent_id, state_dir=state_root
+        )
+        env["rb-soul"] = lambda agent_id: rb_soul(
+            agent_id, state_dir=state_root
+        )
+        env["rb-channels"] = lambda: rb_channels(state_dir=state_root)
+        env["rb-trending"] = lambda: rb_trending(state_dir=state_root)
+        env["rb-post"] = rb_post
+        env["rb-comment"] = rb_comment
+        env["rb-react"] = rb_react
+        env["rb-run"] = rb_run if trusted else _denied("process.python")
 
     # -- Special values --
     env["#t"] = True
@@ -1911,12 +1922,9 @@ def make_global_env(
     # -- Error handling --
     env["error"] = lambda msg: _raise_error(msg)
 
-    capabilities = [
-        "lispy-core@1",
-        "console",
-        "rappterbook.read",
-        "rappterbook.plan",
-    ]
+    capabilities = ["lispy-core@1", "console"]
+    if host_profile:
+        capabilities.extend(["rappterbook.read", "rappterbook.plan"])
     if trusted:
         capabilities.extend(
             ["filesystem.read", "filesystem.write", "process.python"]
@@ -1926,6 +1934,15 @@ def make_global_env(
         "name": "LisPy",
         "version": VERSION,
         "profile": LANGUAGE_PROFILE,
+        "profiles": (
+            [LANGUAGE_PROFILE]
+            if not host_profile
+            else [
+                LANGUAGE_PROFILE,
+                "rappterbook.read",
+                "rappterbook.plan",
+            ]
+        ),
         "trusted": trusted,
         "stdlib_loaded": load_stdlib,
         "capabilities": list(capabilities),
@@ -1942,7 +1959,7 @@ def make_global_env(
         user_context = env.context
         env.context = ExecutionContext(ExecutionLimits.unlimited())
         try:
-            _load_stdlib(env)
+            _load_stdlib(env, profile)
         finally:
             env.context = user_context
 
@@ -2679,12 +2696,14 @@ class LispyVM:
         trusted: bool = False,
         load_stdlib: bool = True,
         limits: ExecutionLimits | None = None,
+        profile: str = "default",
     ):
         self.state_root = Path(
             state_root if state_root is not None else STATE_DIR
         ).expanduser().resolve()
         self.trusted = trusted
         self.load_stdlib = load_stdlib
+        self.profile = profile
         configured = limits or ExecutionLimits()
         self.limits = ExecutionLimits(**configured.as_dict())
 
@@ -2696,6 +2715,7 @@ class LispyVM:
             limits=ExecutionLimits(**self.limits.as_dict()),
             output=output,
             state_dir=self.state_root,
+            profile=self.profile,
         )
         try:
             value = run_string(source, env, source_name="<vm>")
@@ -3041,6 +3061,7 @@ def run_hosted_governor(
             trusted=False,
             limits=effective_limits,
             output=output,
+            profile="core",
         )
     except LispError as exc:
         return _hosted_error_receipt(base, output, "prepare", exc)
@@ -3070,6 +3091,10 @@ def run_hosted_governor(
         "name": "LisPy",
         "version": VERSION,
         "profile": LANGUAGE_PROFILE,
+        "profiles": [
+            LANGUAGE_PROFILE,
+            "hosted-governor@2",
+        ],
         "host_api": "lispy.hosted-governor/v2",
         "trusted": False,
         "stdlib_loaded": True,
@@ -3577,6 +3602,10 @@ def _worker_manifest():
             "name": "LisPy",
             "version": VERSION,
             "profile": LANGUAGE_PROFILE,
+            "profiles": [
+                LANGUAGE_PROFILE,
+                "hosted-governor@2",
+            ],
         },
         "artifact_sha256": _artifact_sha256(registered),
         "operations": ["manifest", "hosted-governor"],
@@ -4300,7 +4329,12 @@ INSTALLED_REQUIRED_PATHS = (
     "lisppy/demo.py",
     "lisppy/effects.py",
     "lisppy/host.py",
+    "lisppy/mars.py",
     "lisppy/data/stdlib.lisp",
+    "lisppy/data/core-stdlib.lisp",
+    "lisppy/data/rappterbook-stdlib.lisp",
+    "lisppy/data/mars/governor-contract.json",
+    "lisppy/data/mars/governor-vectors.json",
     "lisppy/data/registered/hosted-governor.lisp",
     "lisppy/data/registered/mars-colony-governor.lisp",
     "lisppy/data/sample-state/agents.json",

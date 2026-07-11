@@ -25,7 +25,7 @@
       "runtime": "python-hosted",
       "proof": "local-executed",
       "external_target": "mars-barn-viewer",
-      "external_status": "unverified-incompatible"
+      "external_status": "unverified"
     },
     "mars-browser-external@1": {
       "runtime": "mars-barn-vos",
@@ -111,8 +111,10 @@
       "proof": "local-executed",
       "source_id": "mars-barn/governor-example",
       "contract_id": "mars-barn/governor-controls@1",
+      "contract": "spec/mars/governor-contract.json",
+      "vectors": "spec/mars/governor-vectors.json",
       "external_target": "mars-barn-viewer",
-      "external_status": "unverified-incompatible"
+      "external_status": "unverified"
     }
   ]
 }

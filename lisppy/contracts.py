@@ -24,6 +24,8 @@ PROFILE_FIELDS = {
     "corpus",
     "wire",
     "status",
+    "stdlib",
+    "host_extensions",
 }
 CONTRACT_MAX_BYTES = 8_388_608
 CONTRACT_MAX_DEPTH = 128
@@ -64,6 +66,18 @@ def _validate_profile(value):
         or value["corpus"] != "lispy-conformance@2"
         or value["wire"] != "lispy-value@1"
         or value["status"] != "implemented-reference"
+        or value["stdlib"]
+        != {
+            "resource": "stdlib.lisp",
+            "kind": "portable-core",
+            "exports": [
+                "identity",
+                "constantly",
+                "complement",
+                "partial",
+            ],
+        }
+        or value["host_extensions"] != "excluded"
     ):
         raise ValueError("invalid contract profile resource")
     return value

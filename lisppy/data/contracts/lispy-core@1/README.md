@@ -5,7 +5,10 @@
 - Evaluation is left-to-right.
 - Only `#f` and `nil` are false.
 - `#t`/`#f` are canonical booleans; `true`/`false` are compatibility aliases.
-- The bundled `stdlib.lisp` loads by default.
+- The portable `stdlib.lisp` contract contains only `identity`, `constantly`,
+  `complement`, and `partial`.
+- The default Python runtime layers optional Rappterbook read/plan helpers for
+  source compatibility and reports those profiles separately.
 - Host capabilities are separate from core semantics and denied unless enabled.
 - `do`, quasiquote, browser APIs, and Mars host actions are not part of Core 1.
 - Deterministic execution limits are an implementation safety profile, not a

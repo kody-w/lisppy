@@ -1,0 +1,61 @@
+{
+  "schema": "lispy.mars-governor-vectors/v1",
+  "contract_id": "mars-barn/governor-controls@1",
+  "source_sha256": "4c4ecd02337f42d06b25a5ace3a92c2be13c6f570c8047985fafce8fcaab5779",
+  "initial_outputs": {
+    "heating_alloc": 0.25,
+    "isru_alloc": 0.4,
+    "greenhouse_alloc": 0.35,
+    "food_ration": 1.0
+  },
+  "vectors": [
+    {
+      "id": "o2-emergency",
+      "inputs": {"sol": 1, "o2_days": 3, "h2o_days": 20, "food_days": 20, "power_kwh": 200, "colony_risk_index": 10},
+      "outputs": {"heating_alloc": 0.1, "isru_alloc": 0.85, "greenhouse_alloc": 0.05, "food_ration": 0.5},
+      "log_contains": "O2 EMERGENCY"
+    },
+    {
+      "id": "h2o-emergency",
+      "inputs": {"sol": 1, "o2_days": 20, "h2o_days": 3, "food_days": 20, "power_kwh": 200, "colony_risk_index": 10},
+      "outputs": {"heating_alloc": 0.12, "isru_alloc": 0.8, "greenhouse_alloc": 0.08, "food_ration": 0.55},
+      "log_contains": "H2O EMERGENCY"
+    },
+    {
+      "id": "food-emergency",
+      "inputs": {"sol": 1, "o2_days": 20, "h2o_days": 20, "food_days": 5, "power_kwh": 200, "colony_risk_index": 10},
+      "outputs": {"heating_alloc": 0.15, "isru_alloc": 0.25, "greenhouse_alloc": 0.6, "food_ration": 0.65},
+      "log_contains": "Food priority"
+    },
+    {
+      "id": "power-emergency",
+      "inputs": {"sol": 1, "o2_days": 20, "h2o_days": 20, "food_days": 20, "power_kwh": 50, "colony_risk_index": 10},
+      "outputs": {"heating_alloc": 0.55, "isru_alloc": 0.25, "greenhouse_alloc": 0.2, "food_ration": 0.75},
+      "log_contains": "Power critical"
+    },
+    {
+      "id": "risk-emergency",
+      "inputs": {"sol": 1, "o2_days": 20, "h2o_days": 20, "food_days": 20, "power_kwh": 200, "colony_risk_index": 60},
+      "outputs": {"heating_alloc": 0.4, "isru_alloc": 0.35, "greenhouse_alloc": 0.25, "food_ration": 0.8},
+      "log_contains": "High CRI"
+    },
+    {
+      "id": "nominal",
+      "inputs": {"sol": 1, "o2_days": 20, "h2o_days": 20, "food_days": 20, "power_kwh": 200, "colony_risk_index": 10},
+      "outputs": {"heating_alloc": 0.25, "isru_alloc": 0.35, "greenhouse_alloc": 0.4, "food_ration": 1.0},
+      "log_contains": "Nominal"
+    },
+    {
+      "id": "priority-o2-first",
+      "inputs": {"sol": 1, "o2_days": 3, "h2o_days": 3, "food_days": 5, "power_kwh": 50, "colony_risk_index": 60},
+      "outputs": {"heating_alloc": 0.1, "isru_alloc": 0.85, "greenhouse_alloc": 0.05, "food_ration": 0.5},
+      "log_contains": "O2 EMERGENCY"
+    },
+    {
+      "id": "thresholds-are-strict",
+      "inputs": {"sol": 1, "o2_days": 5, "h2o_days": 5, "food_days": 10, "power_kwh": 80, "colony_risk_index": 50},
+      "outputs": {"heating_alloc": 0.25, "isru_alloc": 0.35, "greenhouse_alloc": 0.4, "food_ration": 1.0},
+      "log_contains": "Nominal"
+    }
+  ]
+}

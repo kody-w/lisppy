@@ -132,6 +132,25 @@ class InstalledContractTests(unittest.TestCase):
         profile = load_profile()
         self.assertEqual(profile["profile"], "lispy-core@1")
         self.assertEqual(profile["corpus"], load_contract()["schema"])
+        self.assertEqual(
+            profile["stdlib"]["exports"],
+            ["identity", "constantly", "complement", "partial"],
+        )
+        self.assertEqual(profile["host_extensions"], "excluded")
+
+    def test_core_stdlib_has_no_host_profile_dependencies(self):
+        core = (
+            ROOT / "spec" / "v1" / "stdlib.lisp"
+        ).read_text(encoding="utf-8")
+        extension = (
+            ROOT / "rappterbook-stdlib.lisp"
+        ).read_text(encoding="utf-8")
+        aggregate = (ROOT / "stdlib.lisp").read_text(encoding="utf-8")
+        self.assertNotIn("(rb-", core)
+        self.assertIn("(rb-state", extension)
+        for name in ("identity", "constantly", "complement", "partial"):
+            self.assertIn(f"(define ({name}", core)
+            self.assertIn(f"(define ({name}", aggregate)
 
     def test_module_help_does_not_export_a_contract(self):
         result = run_python("-m", "lisppy.contracts", "--help")

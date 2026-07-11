@@ -42,6 +42,8 @@ class PackageFacadeTests(unittest.TestCase):
         )
         demo = lisppy.run_demo()
         self.assertEqual(demo["api"], "lispy.hosted-flow/v2")
+        self.assertTrue(demo["ok"])
+        self.assertTrue(all(demo["checks"].values()))
         self.assertEqual(demo["idempotent_replay"]["adapter_calls"], 1)
 
     def test_demo_failure_is_one_redacted_json_line(self):
@@ -59,6 +61,23 @@ class PackageFacadeTests(unittest.TestCase):
         self.assertEqual(response["api"], "lispy.error/v1")
         self.assertEqual(response["error"]["code"], "demo_failed")
         self.assertNotIn("private", output.getvalue())
+
+    def test_demo_semantic_failure_returns_nonzero(self):
+        import lisppy.demo as demo_module
+
+        output = io.StringIO()
+        with mock.patch.object(
+            demo_module,
+            "run_demo",
+            return_value={
+                "api": "lispy.hosted-flow/v2",
+                "ok": False,
+                "checks": {"first_frame_committed": False},
+            },
+        ), contextlib.redirect_stdout(output):
+            status = demo_module.main([])
+        self.assertEqual(status, 1)
+        self.assertFalse(json.loads(output.getvalue())["ok"])
 
     def test_demo_module_help_does_not_execute_the_demo(self):
         result = run_python("-m", "lisppy.demo", "--help")

@@ -3,10 +3,17 @@ include README.md
 include CHANGELOG.md
 include LISPY.md
 include stdlib.lisp
+include core-stdlib.lisp
+include rappterbook-stdlib.lisp
+include cubby.json
+include rapp-compliance.json
 include .github/scripts/verify_testpypi.py
 include .github/workflows/publish.yml
 include .github/workflows/tests.yml
 recursive-include examples *.lisp *.json *.md *.py
+recursive-include agents *.py
+recursive-include docs *.html *.md
+recursive-include tools *.py
 recursive-include lisppy/data *
 recursive-include spec *
 recursive-include tests *.py

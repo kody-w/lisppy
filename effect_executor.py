@@ -247,6 +247,22 @@ class InMemoryIdempotencyStore:
                 del self._records[key]
             return True
 
+    def abort_reserved_batch(self, batch_token):
+        with self._lock:
+            matching = [
+                key
+                for key, record in self._records.items()
+                if record.get("batch_token") == batch_token
+            ]
+            if any(
+                self._records[key]["state"] not in ("pending", "reserved")
+                for key in matching
+            ):
+                return False
+            for key in matching:
+                del self._records[key]
+            return True
+
 
 class SQLiteIdempotencyStore:
     """Durable SQLite store using transactional claims."""
@@ -559,6 +575,35 @@ class SQLiteIdempotencyStore:
                 if deleted.rowcount != len(tail_tokens):
                     self.connection.rollback()
                     return False
+            self.connection.commit()
+            return True
+        except sqlite3.Error:
+            self.connection.rollback()
+            raise
+
+    def abort_reserved_batch(self, batch_token):
+        self.connection.execute("BEGIN IMMEDIATE")
+        try:
+            unsafe = self.connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM effect_claims
+                WHERE batch_token = ?
+                AND state NOT IN ('pending', 'reserved')
+                """,
+                (batch_token,),
+            ).fetchone()[0]
+            if unsafe:
+                self.connection.rollback()
+                return False
+            self.connection.execute(
+                """
+                DELETE FROM effect_claims
+                WHERE batch_token = ?
+                AND state IN ('pending', 'reserved')
+                """,
+                (batch_token,),
+            )
             self.connection.commit()
             return True
         except sqlite3.Error:
@@ -892,7 +937,18 @@ def execute_effects_batch(
         if len(tokens) != len(set(tokens)):
             raise EffectExecutionError("duplicate atomic reservation token")
     except EffectExecutionError:
-        if isinstance(claims, list) and hasattr(store, "release_batch"):
+        abort_reserved = getattr(store, "abort_reserved_batch", None)
+        if callable(abort_reserved):
+            try:
+                if not abort_reserved(batch_token):
+                    raise EffectExecutionError(
+                        "atomic reservation cleanup was rejected"
+                    )
+            except Exception as cleanup_error:
+                raise EffectExecutionError(
+                    "invalid atomic reservation cleanup failed"
+                ) from cleanup_error
+        elif isinstance(claims, list) and hasattr(store, "release_batch"):
             tokens = [
                 claim.get("token")
                 for claim in claims

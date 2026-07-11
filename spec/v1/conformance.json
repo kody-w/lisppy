@@ -313,6 +313,30 @@
         "error": {"category": "evaluation"},
         "stdout": ""
       }
+    },
+    {
+      "id": "stdlib.constantly",
+      "source": "((constantly 7) 1 2 3)",
+      "expect": {
+        "value": {"tag": "integer", "value": "7"},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "stdlib.complement",
+      "source": "((complement zero?) 3)",
+      "expect": {
+        "value": {"tag": "boolean", "value": true},
+        "stdout": ""
+      }
+    },
+    {
+      "id": "boundary.quasiquote-unsupported",
+      "source": "`(1 2)",
+      "expect": {
+        "error": {"category": "unsupported"},
+        "stdout": ""
+      }
     }
   ]
 }

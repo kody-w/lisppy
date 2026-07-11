@@ -437,6 +437,40 @@ class EffectExecutorTests(unittest.TestCase):
                 if hasattr(store, "close"):
                     store.close()
 
+    def test_abort_reserved_batch_releases_every_untouched_claim(self):
+        factories = [
+            ("memory", lambda _directory: effect_executor.InMemoryIdempotencyStore()),
+            (
+                "sqlite",
+                lambda directory: effect_executor.SQLiteIdempotencyStore(
+                    Path(directory) / "effects.sqlite3"
+                ),
+            ),
+        ]
+        reservations = [
+            {"key": "first", "fingerprint": "a" * 64},
+            {"key": "second", "fingerprint": "b" * 64},
+        ]
+        for name, factory in factories:
+            with self.subTest(store=name), tempfile.TemporaryDirectory() as directory:
+                store = factory(directory)
+                reserved = store.reserve_batch("test", reservations, "owner")
+                self.assertTrue(
+                    store.abort_reserved_batch(reserved["batch_token"])
+                )
+                for item in reservations:
+                    self.assertEqual(
+                        store.claim(
+                            "test",
+                            item["key"],
+                            item["fingerprint"],
+                            "next",
+                        )["decision"],
+                        "claimed",
+                    )
+                if hasattr(store, "close"):
+                    store.close()
+
     def test_stopped_duplicate_result_respects_aggregate_limit(self):
         receipt = proposal(SOURCE_TWO)
         calls = []

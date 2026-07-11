@@ -1,7 +1,9 @@
-;; stdlib.lisp — LisPy standard library
+;; stdlib.lisp — compatibility aggregate standard library
 ;;
 ;; This file is loaded automatically by the interpreter. It defines
-;; higher-level abstractions on top of the rb-* primitives.
+;; portable Core combinators plus Rappterbook host-profile helpers.
+;; The contract pack exposes core-stdlib.lisp semantics only; new embedders
+;; should treat rappterbook-stdlib.lisp as an optional extension.
 ;;
 ;; The interpreter is: python3 lisp.py
 ;; This file is: pure Lisp extensions loaded at startup.

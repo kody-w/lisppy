@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.24.0
+
+- Split the portable Core stdlib contract from optional Rappterbook helpers,
+  exposed active profiles explicitly, and expanded boundary/stdlib vectors.
+- Added packaged Mars governor contract and policy vectors with deterministic
+  local evidence and explicit decision-only/external-unverified semantics.
+- Tightened hosted-frame execution receipts, batch-wide malformed-reservation
+  cleanup, and fail-closed demo proof checks.
+
+## 0.23.0
+
+- Added a frozen-ABI `LispyRuntime` `*_agent.py` adapter so LisPy rides RAPP as
+  userspace instead of claiming a second kernel, route, or runtime-parity tier.
+- Added a strict `rapp-cubby/1.0` manifest and machine-verifiable RAPP
+  compliance receipt pinned to the latest exhaustive `rapp-spine/1.1` crawl.
+- Documented applicable and non-applicable RAPP contracts plus registration,
+  dependency-distribution, and upstream-spine completion gaps.
+
 ## 0.22.0
 
 - Completed hosted-frame v2 phase semantics with pure effect preflight, strict

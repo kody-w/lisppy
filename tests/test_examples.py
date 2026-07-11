@@ -117,7 +117,7 @@ class ExampleTests(unittest.TestCase):
             if item["path"].endswith("mars-colony-governor.lisp")
         )
         self.assertEqual(candidate["proof"], "local-executed")
-        self.assertEqual(candidate["external_status"], "unverified-incompatible")
+        self.assertEqual(candidate["external_status"], "unverified")
 
     def test_hosted_examples_are_parseable_and_profile_tagged(self):
         hosted = [

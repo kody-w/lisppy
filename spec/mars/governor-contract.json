@@ -1,0 +1,44 @@
+{
+  "schema": "lispy.mars-governor-contract/v1",
+  "source_id": "mars-barn/governor-example",
+  "profile": "mars-governor-candidate@2",
+  "contract_id": "mars-barn/governor-controls@1",
+  "source_sha256": "4c4ecd02337f42d06b25a5ace3a92c2be13c6f570c8047985fafce8fcaab5779",
+  "execution_kind": "decision_only",
+  "external_target_status": "unverified",
+  "required_inputs": {
+    "sol": "non-negative integer",
+    "o2_days": "finite non-negative number",
+    "h2o_days": "finite non-negative number",
+    "food_days": "finite non-negative number",
+    "power_kwh": "finite non-negative number",
+    "colony_risk_index": "finite number"
+  },
+  "mutable_outputs": {
+    "heating_alloc": "finite number in [0,1]",
+    "isru_alloc": "finite number in [0,1]",
+    "greenhouse_alloc": "finite number in [0,1]",
+    "food_ration": "finite number in [0.08,1.5]"
+  },
+  "invariants": [
+    "heating_alloc + isru_alloc + greenhouse_alloc == 1",
+    "all four outputs are written in every branch",
+    "no external effect is emitted"
+  ],
+  "priority": [
+    "o2",
+    "h2o",
+    "food",
+    "power",
+    "risk",
+    "nominal"
+  ],
+  "thresholds": {
+    "o2_days_lt": 5,
+    "h2o_days_lt": 5,
+    "food_days_lt": 10,
+    "power_kwh_lt": 80,
+    "colony_risk_index_gt": 50
+  },
+  "effect_types": []
+}

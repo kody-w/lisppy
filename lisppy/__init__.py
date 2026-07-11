@@ -42,6 +42,9 @@ __all__ = [
     "run_registered_governor",
     "run_hosted_frame",
     "run_hosted_frame_v2",
+    "load_mars_contract",
+    "load_mars_vectors",
+    "run_mars_vectors",
     "main",
 ]
 
@@ -71,6 +74,14 @@ def __getattr__(name):
         from . import host
 
         return getattr(host, name)
+    if name in {
+        "load_mars_contract",
+        "load_mars_vectors",
+        "run_mars_vectors",
+    }:
+        from . import mars
+
+        return getattr(mars, name)
     if name in __all__ or name == "STATE_DIR":
         return getattr(_runtime, name)
     raise AttributeError(name)

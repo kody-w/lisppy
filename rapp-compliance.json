@@ -1,0 +1,119 @@
+{
+  "schema": "lispy-rapp-compliance/1.0",
+  "project": {
+    "name": "LisPy",
+    "repository": "kody-w/lisppy",
+    "version": "0.24.0",
+    "public_twin": "https://github.com/kody-w/lisppy",
+    "development_base_commit": "b665d1067097193c5ca57716a236e722ed328547",
+    "release_status": "candidate-unreleased"
+  },
+  "spine": {
+    "schema": "rapp-spine/1.1",
+    "repository": "kody-w/rapp-spine",
+    "commit": "b41a4578104ebd7d837fe8022bc5f81acc6c377d",
+    "generated": "2026-07-11",
+    "artifacts": {
+      "index.json": "56a6d11281e2a3bfd52857e26733e6ff77d956a4aa68afacfa3b0e2c308fe679",
+      "registry.json": "8367f656a89addb9781a8182ec0655e268c0c031cf836e27a9eec50ba51d6560",
+      "foundation.json": "18748997a9f49c1f592f95798443a4a4a3034520a578ac363758ab79527bd0cd",
+      "crawl.json": "fc67bd467811e2fe6a742fe4cc9ba373efc43548757f55627d8e58674d9468eb"
+    },
+    "crawl_receipt": {
+      "schema": "rapp-crawl-receipt/1.0",
+      "nodes_visited": 220,
+      "required_sources": 127,
+      "sources_read": 90,
+      "sources_unresolved": 37,
+      "upstream_blocking_gaps": 42,
+      "spine_complete": false
+    }
+  },
+  "classification": {
+    "rapp_role": "userspace-agent-cubby",
+    "kernel": false,
+    "distro": false,
+    "substrate_runtime": false,
+    "runtime_parity_claim": "none",
+    "network_surface": [],
+    "reason": "LisPy rides the frozen RAPP wire as a drop-in agent; it is not a second kernel, server, or /chat implementation."
+  },
+  "applicable_specs": [
+    {
+      "spec": "rapp-agent/1.0",
+      "status": "conformant-userspace-adapter",
+      "evidence": "agents/lispy_runtime_agent.py"
+    },
+    {
+      "spec": "rapp-cubby/1.0",
+      "status": "conformant-manifest",
+      "evidence": "cubby.json"
+    },
+    {
+      "spec": "rapp-canon/1.0",
+      "status": "observed",
+      "evidence": "This manifest pins the currency authority at the recorded spine commit and does not claim kernel legality."
+    },
+    {
+      "spec": "rapp-substrate-trust/1.0",
+      "status": "read-side-conformant-write-consent-unattested",
+      "evidence": "The repository contains no credentials and publication is world-readable. Future canonical writes should use PR-consent merges."
+    }
+  ],
+  "not_applicable": [
+    {
+      "spec": "rapp-runtime-parity/1.0",
+      "reason": "LisPy does not serve POST /chat and makes no RAPP runtime-tier claim."
+    },
+    {
+      "spec": "rapp-auth/1.0",
+      "reason": "The adapter owns no token exchange or authentication surface."
+    },
+    {
+      "spec": "rapp-kernel-boundary/1.0",
+      "reason": "The adapter adds no route or listening network service."
+    },
+    {
+      "spec": "rapp-trust/1.0",
+      "reason": "The adapter does not mint rappids or authorize actors."
+    }
+  ],
+  "artifacts": {
+    "agent": {
+      "path": "agents/lispy_runtime_agent.py",
+      "sha256": "7d10649ff474dd62f8e4474746d86ce5f9c9fb403c1373784937ac21da68ff70",
+      "abi": "BasicAgent.metadata + perform(**kwargs) -> str",
+      "discovery": "agents/**/*_agent.py"
+    },
+    "cubby": {
+      "path": "cubby.json",
+      "sha256": "f4ac0cfe2dd5cce32065e4f3c93d4f8db102e595d82b195573f22951d7141041",
+      "schema": "rapp-cubby/1.0",
+      "streamable": {
+        "agents": true
+      }
+    }
+  },
+  "known_gaps": [
+    {
+      "id": "registration",
+      "status": "open",
+      "detail": "LisPy is not yet listed in rapp-spine, RAR, or another canonical ecosystem registry."
+    },
+    {
+      "id": "dependency-distribution",
+      "status": "open",
+      "detail": "The drop-in agent requires the LisPy Python package to be installed on the host."
+    },
+    {
+      "id": "substrate-pr-consent",
+      "status": "open",
+      "detail": "The published base commit was pushed directly to main; future canonical writes should be ratified through merged PR consent."
+    },
+    {
+      "id": "spine-upstream-completion",
+      "status": "upstream",
+      "detail": "The exhaustive crawl itself reports 37 unresolved required sources and 42 blocking known gaps."
+    }
+  ]
+}

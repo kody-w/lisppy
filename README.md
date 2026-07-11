@@ -6,6 +6,8 @@ Code is data. Data is code. The REPL is the heartbeat.
 
 [Explore the v0.22 evolution guide and roadmap.](docs/evolution-guide.html)
 
+[See LisPy's pinned RAPP-spine compliance classification.](docs/RAPP_COMPLIANCE.md)
+
 ---
 
 ## What is this?
@@ -373,6 +375,11 @@ manifest-plus-corpus view.
 The bundled `stdlib.lisp` loads automatically. Pass `--no-stdlib` for a bare
 core environment.
 
+The portable contract stdlib contains only `identity`, `constantly`,
+`complement`, and `partial`. The default Python runtime layers
+`rappterbook.read` and `rappterbook.plan` helpers through the compatibility
+aggregate; `runtime-info` reports every active profile explicitly.
+
 Core 1 now centralizes truth, type-aware structural equality, recursive JSON
 null conversion, strict finite JSON output, and portable wire encoding through
 `Core1ValueOps`. Core 2 remains deferred until it has a separate value model and
@@ -404,6 +411,15 @@ The browser scraper and score preview remain external and unverified.
 The local Mars candidate v2 writes every control in every branch, including
 water emergencies and explicit food-ration recovery; external simulation
 semantics remain unverified.
+
+Run the packaged local policy evidence without contacting an external runtime:
+
+```bash
+python3 -m lisppy.mars
+```
+
+Its contract and vectors bind source hash, required inputs, output invariants,
+branch priority, strict thresholds, complete writes, and zero external effects.
 
 The installed end-to-end demonstration evaluates a registered governor,
 validates and applies its dry-run effect through a recording adapter, proves an

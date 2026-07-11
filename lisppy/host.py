@@ -138,6 +138,7 @@ def run_hosted_frame_v2(
             raise ValueError("execution_id is invalid")
         required_store_methods = {
             "abort_batch",
+            "abort_reserved_batch",
             "begin_batch_execution",
             "mark_indeterminate",
             "release_batch",
@@ -235,6 +236,13 @@ def run_hosted_frame_v2(
         "status": status,
         "phase": "commit" if committed else "execute",
         "execution_status": execution_status,
+        "commit_kind": (
+            "decision_only"
+            if committed and not proposal["effects"]
+            else "effects_applied"
+            if committed
+            else None
+        ),
         "source_id": source_id,
         "proposal": proposal,
         "execution": execution,
@@ -265,6 +273,7 @@ def _frame_v2_error(
         "status": status,
         "phase": phase,
         "execution_status": None,
+        "commit_kind": None,
         "source_id": source_id,
         "proposal": proposal,
         "execution": None,
@@ -320,13 +329,59 @@ def _validate_frame_execution(execution, proposal, expected, execution_id):
     for proposed, executed in zip(proposal["effects"], execution["effects"]):
         if (
             not isinstance(executed, dict)
+            or set(executed) != {
+                "sequence",
+                "type",
+                "idempotency_key",
+                "effect_sha256",
+                "adapter_id",
+                "status",
+                "result",
+                "error",
+            }
             or executed.get("sequence") != proposed["sequence"]
             or executed.get("type") != proposed["type"]
             or executed.get("idempotency_key")
             != proposed["idempotency_key"]
             or executed.get("effect_sha256") != proposed["effect_sha256"]
+            or executed.get("adapter_id")
+            != expected["adapter_ids"].get(proposed["type"])
         ):
             raise ValueError("execution effect does not match proposal")
+        effect_status = executed["status"]
+        if effect_status not in (
+            "applied",
+            "conflict",
+            "duplicate_applied",
+            "indeterminate",
+            "not_attempted",
+            "not_reserved",
+        ):
+            raise ValueError("invalid execution effect status")
+        if effect_status == "applied":
+            if executed["error"] is not None:
+                raise ValueError("applied execution effect has an error")
+        elif effect_status == "duplicate_applied":
+            if (
+                executed["error"] is not None
+                and (
+                    executed["result"] is not None
+                    or not isinstance(executed["error"], dict)
+                )
+            ):
+                raise ValueError("invalid duplicate execution evidence")
+        elif executed["result"] is not None:
+            raise ValueError("incomplete execution effect has a result")
+    valid_status_reservations = {
+        "completed": {"reserved"},
+        "partially_applied": {"reserved"},
+        "stopped": {"reserved"},
+        "rejected": {"conflict", "indeterminate"},
+    }
+    if execution["reservation"] not in valid_status_reservations[
+        execution["status"]
+    ]:
+        raise ValueError("execution reservation/status mismatch")
     if execution["status"] == "completed" and any(
         item.get("status") not in ("applied", "duplicate_applied")
         for item in execution["effects"]

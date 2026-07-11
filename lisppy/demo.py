@@ -74,7 +74,7 @@ def run_demo():
         namespace="offline-demo",
         execution_id="offline-apply-3",
     )
-    return {
+    report = {
         "api": "lispy.hosted-flow/v2",
         "first_frame": {
             "status": first["status"],
@@ -93,6 +93,26 @@ def run_demo():
         },
         "source_sha256": source["source_sha256"],
     }
+    checks = {
+        "first_frame_committed": report["first_frame"]["status"] == "committed",
+        "first_effect_applied": (
+            report["first_frame"]["effect_status"] == "applied"
+        ),
+        "idempotent_replay": (
+            report["idempotent_replay"]["effect_status"] == "duplicate_applied"
+            and report["idempotent_replay"]["adapter_calls"] == 1
+        ),
+        "second_frame_committed": (
+            report["second_frame"]["status"] == "committed"
+        ),
+        "output_handoff": (
+            report["second_frame"]["initial_outputs_from_first_frame"]
+            == report["first_frame"]["outputs"]
+        ),
+    }
+    report["checks"] = checks
+    report["ok"] = all(checks.values())
+    return report
 
 
 def _argument_parser():
@@ -130,7 +150,7 @@ def main(argv=None):
         }
         status = 1
     else:
-        status = 0
+        status = 0 if report.get("ok") is True else 1
     print(
         json.dumps(
             report,

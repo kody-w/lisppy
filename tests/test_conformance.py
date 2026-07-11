@@ -131,7 +131,7 @@ def validate_manifest(manifest):
 def run_case(case):
     leaked = io.StringIO()
     with contextlib.redirect_stdout(leaked):
-        result = lisp.LispyVM().execute(case["source"])
+        result = lisp.LispyVM(profile="core").execute(case["source"])
     if leaked.getvalue():
         raise AssertionError("conformance execution leaked process stdout")
     actual = {"stdout": result.output}

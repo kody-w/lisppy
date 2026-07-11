@@ -32,6 +32,14 @@ class CapabilityTests(unittest.TestCase):
         builtins = lisp.run_string("(builtin-manifest)", lisp.make_global_env())
         self.assertFalse(safe["trusted"])
         self.assertTrue(safe["stdlib_loaded"])
+        self.assertEqual(
+            safe["profiles"],
+            [
+                "lispy-core@1",
+                "rappterbook.read",
+                "rappterbook.plan",
+            ],
+        )
         self.assertIn("identity", builtins)
         self.assertNotIn("process.python", safe["capabilities"])
         self.assertTrue(trusted["trusted"])

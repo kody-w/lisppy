@@ -1,4 +1,5 @@
 import unittest
+import copy
 from unittest import mock
 
 import lisp
@@ -166,6 +167,7 @@ class RegisteredHostedFrameTests(unittest.TestCase):
         self.assertEqual(frame["error"]["code"], "execution_state_unknown")
         self.assertIsNotNone(frame["proposal"])
         self.assertEqual(calls, [])
+        self.assertEqual(store._records, {})
 
     def test_frame_v2_effect_preflight_never_calls_store(self):
         class CountingStore(InMemoryIdempotencyStore):
@@ -336,6 +338,69 @@ class RegisteredHostedFrameTests(unittest.TestCase):
                     "food_ration": 1.0,
                 },
             )
+
+    def test_execution_receipt_validator_rejects_contradictions(self):
+        calls = []
+        frame = run_hosted_frame(
+            SOURCE_ID,
+            **self.options(
+                registry(calls),
+                InMemoryIdempotencyStore(),
+                "valid-receipt",
+            ),
+        )
+        execution = frame["execution"]
+        proposal = frame["proposal"]
+        expected = execution["authority"]
+        mutations = []
+        reservation = copy.deepcopy(execution)
+        reservation["reservation"] = "conflict"
+        mutations.append(reservation)
+        adapter = copy.deepcopy(execution)
+        adapter["effects"][0]["adapter_id"] = "wrong@1"
+        mutations.append(adapter)
+        empty = copy.deepcopy(execution)
+        empty["effects"] = []
+        mutations.append(empty)
+        for value in mutations:
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    host_module._validate_frame_execution(
+                        value,
+                        proposal,
+                        expected,
+                        "valid-receipt",
+                    )
+
+    def test_mars_zero_effect_frame_is_explicitly_decision_only(self):
+        source_id = "mars-barn/governor-example"
+        source = registered_source(source_id)
+        frame = run_hosted_frame_v2(
+            source_id,
+            expected_source_sha256=source["source_sha256"],
+            inputs={
+                "sol": 1,
+                "o2_days": 20.0,
+                "h2o_days": 20.0,
+                "food_days": 20.0,
+                "power_kwh": 200.0,
+                "colony_risk_index": 10.0,
+            },
+            mutable_outputs={
+                "heating_alloc": 0.25,
+                "isru_alloc": 0.40,
+                "greenhouse_alloc": 0.35,
+                "food_ration": 1.0,
+            },
+            intent_scope="mars-decision-only",
+            registry=EffectAdapterRegistry().freeze(),
+            store=InMemoryIdempotencyStore(),
+            namespace="mars-local",
+            execution_id="mars-decision",
+        )
+        self.assertEqual(frame["status"], "committed")
+        self.assertEqual(frame["commit_kind"], "decision_only")
+        self.assertEqual(frame["execution"]["effects"], [])
 
 
 if __name__ == "__main__":

@@ -169,7 +169,7 @@ class CliTests(unittest.TestCase):
         version_result = run_cli("--version")
         self.assertEqual(help_result.returncode, 0)
         self.assertIn("--trusted", help_result.stdout)
-        self.assertEqual(version_result.stdout, "LisPy 0.22.0 (lispy-core@1)\n")
+        self.assertEqual(version_result.stdout, "LisPy 0.24.0 (lispy-core@1)\n")
 
     def test_hello_example(self):
         result = run_cli("examples/hello.lisp")
