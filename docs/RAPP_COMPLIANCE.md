@@ -49,12 +49,14 @@ userspace path:
 
 ```bash
 python3 -m pip install .
-cp agents/lispy_runtime_agent.py ~/.brainstem/src/agents/
+cp agents/lispy_runtime_agent.py ~/.brainstem/src/rapp_brainstem/agents/
 ```
 
-The next `/chat` request discovers the agent; no kernel restart or route change
-is required. In a cubby-aware host, use the repository's `cubby.json` and normal
-sha256-verified cubby loading instead of copying manually.
+That is the top level of the Brainstem's `agents/` folder, the only place agents are
+live; a file in a subfolder is parked. The next `/chat` request discovers the agent;
+no kernel restart or route change is required. In a cubby-aware host, use the
+repository's `cubby.json` and normal sha256-verified cubby loading instead of
+copying manually.
 
 ## Compliance matrix
 
