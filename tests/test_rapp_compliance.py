@@ -127,6 +127,17 @@ class RappComplianceTests(unittest.TestCase):
         )
         self.assertTrue(all(receipt["checks"].values()))
 
+    def test_agent_discovery_is_top_level_only(self):
+        # RAPP proposal 0001 (kody-w/RAPP#124): only top-level agents/*_agent.py
+        # files are live; a file in a subfolder of agents/ is parked.
+        manifest = json.loads(
+            (ROOT / "rapp-compliance.json").read_text(encoding="utf-8")
+        )
+        agent = manifest["artifacts"]["agent"]
+        self.assertEqual(agent["discovery"], "agents/*_agent.py")
+        self.assertEqual(Path(agent["path"]).parent, Path("agents"))
+        self.assertTrue(agent["path"].endswith("_agent.py"))
+
     def test_compliance_manifest_denies_runtime_parity_claim(self):
         manifest = json.loads(
             (ROOT / "rapp-compliance.json").read_text(encoding="utf-8")
