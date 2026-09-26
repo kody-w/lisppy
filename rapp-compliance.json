@@ -83,7 +83,7 @@
       "path": "agents/lispy_runtime_agent.py",
       "sha256": "7d10649ff474dd62f8e4474746d86ce5f9c9fb403c1373784937ac21da68ff70",
       "abi": "BasicAgent.metadata + perform(**kwargs) -> str",
-      "discovery": "agents/**/*_agent.py"
+      "discovery": "agents/*_agent.py"
     },
     "cubby": {
       "path": "cubby.json",
