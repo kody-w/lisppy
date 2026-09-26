@@ -61,11 +61,12 @@ its `brainstem` command (`%USERPROFILE%\.local\bin\brainstem.cmd`) names the
 interpreter it runs, and its `start.ps1` uses the first of `python` and `python3`
 on `PATH`.
 
-The agent goes at the top level of the Brainstem's `agents/` folder, the only place
-agents are live; a file in a subfolder is parked. The next `/chat` request
-discovers the agent; no kernel restart or route change is required. In a
-cubby-aware host, use the repository's `cubby.json` and normal sha256-verified
-cubby loading instead of copying manually.
+The agent goes at the top level of the Brainstem's `agents/` folder. Under RAPP
+proposal 0001, and in every grail release, that is the only place agents are live;
+a file in a subfolder is parked. The next `/chat` request discovers the agent; no
+kernel restart or route change is required. In a cubby-aware host, use the
+repository's `cubby.json` and normal sha256-verified cubby loading instead of
+copying manually.
 
 ## Compliance matrix
 
