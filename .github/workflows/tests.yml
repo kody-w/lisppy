@@ -57,6 +57,9 @@ jobs:
               --doctor-mode source --json |
             python -c 'import json,sys; print(json.load(sys.stdin)["pins"]["actual_inventory_sha256"])'
           )"
+          contract_pin="$(
+            python -c 'from lisppy.contracts import contract_manifest; print(contract_manifest()["sha256"])'
+          )"
           python -m venv "$RUNNER_TEMP/direct"
           "$RUNNER_TEMP/direct/bin/python" -m pip install dist/*.whl
           (
@@ -79,6 +82,9 @@ jobs:
             python lisp.py --doctor inventory@1 \
               --doctor-mode source --json |
             python -c 'import json,sys; print(json.load(sys.stdin)["pins"]["actual_inventory_sha256"])'
+          )"
+          contract_pin="$(
+            python -c 'from lisppy.contracts import contract_manifest; print(contract_manifest()["sha256"])'
           )"
           python -m venv "$RUNNER_TEMP/sdist"
           "$RUNNER_TEMP/sdist/bin/python" -m pip install dist/rebuilt/*.whl

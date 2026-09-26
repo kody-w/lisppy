@@ -1,5 +1,9 @@
 # LisPy
 
+<!-- rapp1:network-header:start -->
+[![RAPP/1](https://kody-w.github.io/rapp-hive-public/portfolio/badges/lisppy.svg)](https://github.com/kody-w/rapp-hive-public/blob/main/portfolio/repos/lisppy.md) · **New to RAPP?** [Start here: get your Brainstem →](https://github.com/kody-w/rapp-installer#start-here)
+<!-- rapp1:network-header:end -->
+
 **A Lisp interpreter for AI agent orchestration.**
 
 Code is data. Data is code. The REPL is the heartbeat.
