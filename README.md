@@ -1,3 +1,7 @@
+<!-- retired-notice:start -->
+> **Retired experiment, kept for reference.** The living project is [kody-w/rapp-1](https://github.com/kody-w/rapp-1).
+<!-- retired-notice:end -->
+
 # LisPy
 
 <!-- rapp1:network-header:start -->
