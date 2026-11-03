@@ -112,6 +112,12 @@ third-party dependencies. `pip install .` adds the `lispy` command and
 The distribution name is `rappterbook-lispy-runtime`; the stable import package
 remains `lisppy`, and the command remains `lispy`.
 
+`lisp.py` is the language and CLI. Its sibling `lispy_hosted.py` contains the
+optional Rappterbook bindings, governors, isolated workers, doctor, and replay
+machinery. Ordinary programs do not load that adapter; host calls load it on
+demand. Existing `lisp` imports and CLI flags still work. Embedders using those
+host features must ship both files; the installed distribution includes both.
+
 Both `--eval` and pipe mode print their final value. Errors go to stderr and
 return a nonzero status. Reader errors include source, line, and column. Use
 `python3 lisp.py --help` for all CLI options.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.26.0 — delete-the-part (2026-11-03)
+
+- The hosting machinery moved to `lispy_hosted.py`; `lisp.py` is the language (2,498 lines).
+- Existing Python imports and CLI flags forward lazily. Ordinary programs do not load hosting (a result that carries a receipt imports `_receipt_value` on demand).
+- Both modules ship in the distribution and are bound by worker artifact and doctor inventory hashes.
+- Language semantics, canonical program identities, teaching text, and governor source pins are unchanged.
+
 ## 0.25.0 — the lock-in (2026-11-03)
 
 - LisPy is Wildhaven Homes' universal agent language: `VOCABULARY.md` gives every other dialect a status,

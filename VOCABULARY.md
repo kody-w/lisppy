@@ -60,3 +60,101 @@ Precedents paid for by others: SQL-92 (compliance without a suite meant nothing)
 converged only when the suite was the definition); Rust editions; Ethereum gas / Erlang reductions / WASM fuel;
 E / Caja / WASM / Deno (no ambient authority); JCS / WASM canonical form; Rust's single-compiler decade vs Go's
 two; Scheme's `.scm/.ss/.sls` extension mess vs Python's one `.py`.
+
+## Hosting extraction (since 0.26.0)
+
+| Name | Status | Since |
+|---|---|---|
+| `lispy_hosted.py` | current; optional hosting adapter | 0.26.0 |
+| `_dispatch_hosted_mode` | current; hosted CLI dispatch | 0.26.0 |
+| `HostedValidationError` | alias of `lispy_hosted.HostedValidationError` | 0.26.0 |
+| `_state_path` | alias of `lispy_hosted._state_path` | 0.26.0 |
+| `rb_state` | alias of `lispy_hosted.rb_state` | 0.26.0 |
+| `rb_agent` | alias of `lispy_hosted.rb_agent` | 0.26.0 |
+| `rb_soul` | alias of `lispy_hosted.rb_soul` | 0.26.0 |
+| `rb_channels` | alias of `lispy_hosted.rb_channels` | 0.26.0 |
+| `rb_trending` | alias of `lispy_hosted.rb_trending` | 0.26.0 |
+| `_required_text` | alias of `lispy_hosted._required_text` | 0.26.0 |
+| `rb_post` | alias of `lispy_hosted.rb_post` | 0.26.0 |
+| `rb_comment` | alias of `lispy_hosted.rb_comment` | 0.26.0 |
+| `rb_react` | alias of `lispy_hosted.rb_react` | 0.26.0 |
+| `effect_idempotency_key` | alias of `lispy_hosted.effect_idempotency_key` | 0.26.0 |
+| `effect_digest` | alias of `lispy_hosted.effect_digest` | 0.26.0 |
+| `rb_run` | alias of `lispy_hosted.rb_run` | 0.26.0 |
+| `_read_file` | alias of `lispy_hosted._read_file` | 0.26.0 |
+| `_write_file` | alias of `lispy_hosted._write_file` | 0.26.0 |
+| `_copy_host_value` | alias of `lispy_hosted._copy_host_value` | 0.26.0 |
+| `_receipt_value` | alias of `lispy_hosted._receipt_value` | 0.26.0 |
+| `_hosted_error_receipt` | alias of `lispy_hosted._hosted_error_receipt` | 0.26.0 |
+| `run_hosted_governor` | alias of `lispy_hosted.run_hosted_governor` | 0.26.0 |
+| `WORKER_API` | alias of `lispy_hosted.WORKER_API` | 0.26.0 |
+| `WORKER_MAX_LINE_BYTES` | alias of `lispy_hosted.WORKER_MAX_LINE_BYTES` | 0.26.0 |
+| `WORKER_MAX_RESPONSE_BYTES` | alias of `lispy_hosted.WORKER_MAX_RESPONSE_BYTES` | 0.26.0 |
+| `WORKER_MAX_STDERR_BYTES` | alias of `lispy_hosted.WORKER_MAX_STDERR_BYTES` | 0.26.0 |
+| `WORKER_TIMEOUT_SECONDS` | alias of `lispy_hosted.WORKER_TIMEOUT_SECONDS` | 0.26.0 |
+| `DOCTOR_V3_MAX_REPORT_BYTES` | alias of `lispy_hosted.DOCTOR_V3_MAX_REPORT_BYTES` | 0.26.0 |
+| `_protocol_error` | alias of `lispy_hosted._protocol_error` | 0.26.0 |
+| `_validate_worker_response_shape` | alias of `lispy_hosted._validate_worker_response_shape` | 0.26.0 |
+| `_validate_request_fields` | alias of `lispy_hosted._validate_request_fields` | 0.26.0 |
+| `_worker_limits` | alias of `lispy_hosted._worker_limits` | 0.26.0 |
+| `_validate_mars_governor` | alias of `lispy_hosted._validate_mars_governor` | 0.26.0 |
+| `_registered_sources` | alias of `lispy_hosted._registered_sources` | 0.26.0 |
+| `registered_source` | alias of `lispy_hosted.registered_source` | 0.26.0 |
+| `run_registered_governor` | alias of `lispy_hosted.run_registered_governor` | 0.26.0 |
+| `_artifact_sha256` | alias of `lispy_hosted._artifact_sha256` | 0.26.0 |
+| `_worker_manifest` | alias of `lispy_hosted._worker_manifest` | 0.26.0 |
+| `_handle_worker_request` | alias of `lispy_hosted._handle_worker_request` | 0.26.0 |
+| `_json_line` | alias of `lispy_hosted._json_line` | 0.26.0 |
+| `_worker_environment` | alias of `lispy_hosted._worker_environment` | 0.26.0 |
+| `_run_worker_once` | alias of `lispy_hosted._run_worker_once` | 0.26.0 |
+| `_pump_worker_pipe` | alias of `lispy_hosted._pump_worker_pipe` | 0.26.0 |
+| `_feed_worker_stdin` | alias of `lispy_hosted._feed_worker_stdin` | 0.26.0 |
+| `_kill_worker` | alias of `lispy_hosted._kill_worker` | 0.26.0 |
+| `_supervise_worker` | alias of `lispy_hosted._supervise_worker` | 0.26.0 |
+| `_run_jsonl_supervisor` | alias of `lispy_hosted._run_jsonl_supervisor` | 0.26.0 |
+| `SAMPLE_STATE_FILES` | alias of `lispy_hosted.SAMPLE_STATE_FILES` | 0.26.0 |
+| `_sample_state_sha256` | alias of `lispy_hosted._sample_state_sha256` | 0.26.0 |
+| `_doctor_worker_request` | alias of `lispy_hosted._doctor_worker_request` | 0.26.0 |
+| `_canonical_sha256` | alias of `lispy_hosted._canonical_sha256` | 0.26.0 |
+| `_normalize_sha256_pin` | alias of `lispy_hosted._normalize_sha256_pin` | 0.26.0 |
+| `_verify_worker_response_digests` | alias of `lispy_hosted._verify_worker_response_digests` | 0.26.0 |
+| `_doctor_request` | alias of `lispy_hosted._doctor_request` | 0.26.0 |
+| `_doctor_report` | alias of `lispy_hosted._doctor_report` | 0.26.0 |
+| `_print_doctor_report` | alias of `lispy_hosted._print_doctor_report` | 0.26.0 |
+| `_collect_replay_evidence` | alias of `lispy_hosted._collect_replay_evidence` | 0.26.0 |
+| `_doctor_check` | alias of `lispy_hosted._doctor_check` | 0.26.0 |
+| `INSTALLED_REQUIRED_PATHS` | alias of `lispy_hosted.INSTALLED_REQUIRED_PATHS` | 0.26.0 |
+| `BUILD_INPUT_PATHS` | alias of `lispy_hosted.BUILD_INPUT_PATHS` | 0.26.0 |
+| `_verify_distribution_record` | alias of `lispy_hosted._verify_distribution_record` | 0.26.0 |
+| `_verify_record_content` | alias of `lispy_hosted._verify_record_content` | 0.26.0 |
+| `_validate_distribution_record_paths` | alias of `lispy_hosted._validate_distribution_record_paths` | 0.26.0 |
+| `_installed_doctor_profile` | alias of `lispy_hosted._installed_doctor_profile` | 0.26.0 |
+| `_effects_doctor_profile` | alias of `lispy_hosted._effects_doctor_profile` | 0.26.0 |
+| `_doctor_v2` | alias of `lispy_hosted._doctor_v2` | 0.26.0 |
+| `_source_inventory` | alias of `lispy_hosted._source_inventory` | 0.26.0 |
+| `build_source_sha256` | alias of `lispy_hosted.build_source_sha256` | 0.26.0 |
+| `_inventory_payload` | alias of `lispy_hosted._inventory_payload` | 0.26.0 |
+| `_v3_component` | alias of `lispy_hosted._v3_component` | 0.26.0 |
+| `_v3_failed_component` | alias of `lispy_hosted._v3_failed_component` | 0.26.0 |
+| `DOCTOR_V3_CHECK_CATALOGS` | alias of `lispy_hosted.DOCTOR_V3_CHECK_CATALOGS` | 0.26.0 |
+| `_validate_doctor_v3_error` | alias of `lispy_hosted._validate_doctor_v3_error` | 0.26.0 |
+| `_validate_doctor_v3_sha256` | alias of `lispy_hosted._validate_doctor_v3_sha256` | 0.26.0 |
+| `_validate_doctor_v3_report` | alias of `lispy_hosted._validate_doctor_v3_report` | 0.26.0 |
+| `_doctor_v3` | alias of `lispy_hosted._doctor_v3` | 0.26.0 |
+| `_run_doctor` | alias of `lispy_hosted._run_doctor` | 0.26.0 |
+| `_run_replay` | alias of `lispy_hosted._run_replay` | 0.26.0 |
+| `_reject_present_options` | alias of `lispy_hosted._reject_present_options` | 0.26.0 |
+| `base64` | alias of `lispy_hosted.base64` | 0.26.0 |
+| `csv` | alias of `lispy_hosted.csv` | 0.26.0 |
+| `importlib` | alias of `lispy_hosted.importlib` | 0.26.0 |
+| `signal` | alias of `lispy_hosted.signal` | 0.26.0 |
+| `subprocess` | alias of `lispy_hosted.subprocess` | 0.26.0 |
+| `tempfile` | alias of `lispy_hosted.tempfile` | 0.26.0 |
+| `threading` | alias of `lispy_hosted.threading` | 0.26.0 |
+| `time` | alias of `lispy_hosted.time` | 0.26.0 |
+| `VERSION` (release file) | current; mirrors `lisp.VERSION` | 0.26.0 |
+| `_HOSTED_NAMES` | current; lazy compatibility export registry | 0.26.0 |
+| `_hosted_binding` | current; deferred host binding | 0.26.0 |
+| `__getattr__` | current; lazy module forwarding | 0.26.0 |
+| `__dir__` | current; discoverable compatibility exports | 0.26.0 |
+| `__all__` | current; preserves wildcard imports | 0.26.0 |

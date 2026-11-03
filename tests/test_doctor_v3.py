@@ -9,7 +9,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-import lisp
+import lispy_hosted as lisp
 
 
 class DoctorV3ContractTests(unittest.TestCase):

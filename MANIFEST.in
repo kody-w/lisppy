@@ -1,4 +1,6 @@
 include LICENSE
+include lispy_hosted.py
+include VERSION
 include README.md
 include CHANGELOG.md
 include LISPY.md

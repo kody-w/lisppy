@@ -31,7 +31,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 LISPPY_DIR = Path(os.environ.get("LISPPY_DIR", HERE / "lisppy")).expanduser().resolve()
-LISPPY_SHA256 = "2a6be9272cd49991a6e13929b923afd78e2ec62d35843a509b1d28046ca43d2c"  # lisp.py @ kody-w/lisppy v0.25.0 (lock-in)
+LISPPY_SHA256 = "5bf8de8fac8168e7850f545f9217da33a632e34221dd966fa614d92cc75f5df2"  # lisp.py @ kody-w/lisppy v0.25.0 (lock-in)
 import hashlib  # noqa: E402
 _lisp_bytes = (LISPPY_DIR / "lisp.py").read_bytes()
 if hashlib.sha256(_lisp_bytes).hexdigest() != LISPPY_SHA256:
