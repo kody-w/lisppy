@@ -9,6 +9,8 @@
 ;;   (model-call-safe messages tools)  -> response dict or ()
 ;;   (json-parse-or-nil text)          -> parsed value or ()
 ;;   (agents-load) (agents-tools) (agent-exists? name) (agent-perform name args) -> ("ok" text)|("error" text)
+;;   (agents-perform-all jobs) -> ordered outcomes, independent agents run concurrently
+;;   (emit event) -> host SSE event; a no-op for /chat
 ;;   (soul) (soul-path) (model) (version) (voice-mode) (uuid)
 
 ;; ── small helpers (LisPy has car/cdr; name the positions the kernel uses) ──
@@ -45,27 +47,44 @@
 ;; ── one tool round (brainstem.py run_tool_calls): returns (list tool-messages logs) ──
 (define run-tool-calls
   (lambda (calls)
+    (let* ((prepared
+             (map (lambda (tc)
+                    (let* ((fn (get tc "function"))
+                           (name (get fn "name"))
+                           (args (json-parse-or-nil (get-or fn "arguments" "{}"))))
+                      (list tc name args)))
+                  calls))
+           (jobs (map (lambda (item)
+                        (if (and (dict? (third item)) (agent-exists? (second item)))
+                            (list (second item) (third item))
+                            (list)))
+                      prepared))
+           (results (agents-perform-all jobs)))
+      (format-tool-results prepared results))))
+
+(define format-tool-results
+  (lambda (calls results)
     (if (null? calls)
         (list (list) (list))
-        (let* ((tc (car calls))
-               (fn (get tc "function"))
-               (name (get fn "name"))
+        (let* ((item (car calls))
+               (tc (car item))
+               (name (second item))
                (tc-id (get tc "id"))
-               (args (json-parse-or-nil (get-or fn "arguments" "{}")))
+               (args (third item))
                (outcome
                  (cond
                    ((not (dict? args))
                     (list "Error: Tool arguments must be a valid JSON object."
                           (string-append "[" name "] Error: Tool arguments must be a valid JSON object.")))
                    ((agent-exists? name)
-                    (let ((r (agent-perform name args)))
+                    (let ((r (car results)))
                       (if (equal? (car r) "ok")
                           (list (second r) (string-append "[" name "] " (second r)))
                           (list (string-append "Error: " (second r))
                                 (string-append "[" name "] ERROR: " (second r))))))
                    (else (list (string-append "Agent '" name "' not found.")
                                (string-append "Agent '" name "' not found.")))))
-               (tail (run-tool-calls (cdr calls))))
+               (tail (format-tool-results (cdr calls) (cdr results))))
           ;; append, not cons: lists that arrived as JSON are host lists, and cons would make an improper pair
           (list (append (list (make-dict "tool_call_id" tc-id "role" "tool" "name" name "content" (car outcome)))
                         (car tail))
@@ -78,9 +97,13 @@
            (choice (car (get response "choices")))
            (msg (get choice "message"))
            (messages2 (append messages (list msg)))
-           (calls (get msg "tool_calls")))
+           (calls (get msg "tool_calls"))
+           (sent (if (present? (get msg "content"))
+                     (emit (make-dict "type" "delta" "text" (get msg "content")))
+                     #f)))
       (if (present? calls)
-          (let ((ran (run-tool-calls calls)))
+          (let* ((ran (run-tool-calls calls))
+                 (sent (emit (make-dict "type" "agent" "logs" (string-join (second ran) "\n")))))
             (if (> rounds-left 1)
                 (chat-rounds (append messages2 (car ran)) tools (append logs (second ran)) (- rounds-left 1))
                 (list (append messages2 (car ran)) msg (append logs (second ran)) (get response "model"))))
@@ -119,13 +142,25 @@
                                        history
                                        (list (make-dict "role" "user" "content" user-input))))
                      (run (chat-rounds messages (agents-tools) (list) 3))
-                     (reply (final-reply (car run) (second run))))
+                     (reply (final-reply (car run) (second run)))
+                     (sent (if (present? (get (second run) "tool_calls"))
+                               (emit (make-dict "type" "delta" "text" reply))
+                               #f)))
                 (list 200 (make-dict "response" reply
                                      "session_id" session-id
                                      "agent_logs" (string-join (third run) "\n")
                                      "voice_mode" (voice-mode)
                                      "model" (default (fourth run) (model))
                                      "requested_model" (model)))))))))))
+
+;; The host relays model tokens, suppresses duplicate whole deltas, and sets done.streamed.
+(define handle-chat-stream
+  (lambda (data)
+    (let* ((result (handle-chat data))
+           (sent (if (equal? (car result) 200)
+                     (emit (dict-merge (second result) (make-dict "type" "done" "streamed" #f)))
+                     #f)))
+      result)))
 
 ;; ── GET /health, GET /version ──
 (define handle-health
