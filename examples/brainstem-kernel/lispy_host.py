@@ -31,7 +31,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 LISPPY_DIR = Path(os.environ.get("LISPPY_DIR", HERE / "lisppy")).expanduser().resolve()
-LISPPY_SHA256 = "5bf8de8fac8168e7850f545f9217da33a632e34221dd966fa614d92cc75f5df2"  # lisp.py @ kody-w/lisppy v0.25.0 (lock-in)
+LISPPY_SHA256 = "5bf8de8fac8168e7850f545f9217da33a632e34221dd966fa614d92cc75f5df2"  # lisp.py @ kody-w/lisppy v0.26.0 (delete-the-part)
 import hashlib  # noqa: E402
 _lisp_bytes = (LISPPY_DIR / "lisp.py").read_bytes()
 if hashlib.sha256(_lisp_bytes).hexdigest() != LISPPY_SHA256:
@@ -183,7 +183,7 @@ def model_call(messages, tools, emit=None):
 
 
 # ── local storage, exposed through the agents' usual cloud-storage imports ──
-_DATA_DIR = HERE / ".brainstem_data"
+_DATA_DIR = Path(os.environ.get("BRAINSTEM_DATA_DIR") or HERE / ".brainstem_data")  # GODD data follows the shape (supervisor points it at the grail dir)
 _storage_locks = {}
 _storage_guard = threading.Lock()
 
