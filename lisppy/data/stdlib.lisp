@@ -93,3 +93,16 @@
     (newline)
     (display (string-append "  posts: " (number->string (get ch "post_count" 0))))
     (newline)))
+
+;; ---------------------------------------------------------------------------
+;; Control macros (brought in from RappterLisp / Mars vOS `repeat`; VOCABULARY.md)
+;; ---------------------------------------------------------------------------
+
+(define-macro (when test . body)
+  (list 'if test (cons 'begin body) nil))
+
+(define-macro (unless test . body)
+  (list 'if test nil (cons 'begin body)))
+
+(define-macro (dotimes n . body)
+  (list 'for-each (cons 'lambda (cons (list '_) body)) (list 'range n)))

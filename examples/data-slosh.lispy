@@ -1,4 +1,5 @@
-;; data-slosh.lisp — Demonstrate the data sloshing pattern
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; data-slosh.lispy — Demonstrate the data sloshing pattern
 ;;
 ;; A read/evaluate/propose step for a host-controlled frame loop.
 ;; This example reads fixtures and prints observations; it does not mutate them.

@@ -13,7 +13,7 @@ from tests.support import fresh_replay_bundle, run_cli
 
 
 GOVERNOR = (
-    ROOT / "examples" / "mars-barn" / "mars-colony-governor.lisp"
+    ROOT / "examples" / "mars-barn" / "mars-colony-governor.lispy"
 ).read_text(encoding="utf-8")
 
 

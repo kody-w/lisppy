@@ -112,9 +112,9 @@ class PackageFacadeTests(unittest.TestCase):
         )
         mirrors = {
             "stdlib.lisp": ROOT / "stdlib.lisp",
-            "registered/hosted-governor.lisp": ROOT / "examples" / "hosted-governor.lisp",
+            "registered/hosted-governor.lisp": ROOT / "examples" / "hosted-governor.lispy",
             "registered/mars-colony-governor.lisp": (
-                ROOT / "examples" / "mars-barn" / "mars-colony-governor.lisp"
+                ROOT / "examples" / "mars-barn" / "mars-colony-governor.lispy"
             ),
         }
         for name, mirror in mirrors.items():

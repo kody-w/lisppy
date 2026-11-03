@@ -1,6 +1,12 @@
-<!-- retired-notice:start -->
-> **Retired experiment, kept for reference.** The living project is [kody-w/rapp-1](https://github.com/kody-w/rapp-1).
-<!-- retired-notice:end -->
+<!-- canonical-notice:start -->
+> **Canonical.** This repository is the one LisPy: the `lispy-core@1` specification, its reference
+> implementation (`lisp.py`, pinned by sha256 wherever it is embedded) and its conformance corpus.
+> LisPy is owned and operated by Wildhaven Homes LLC as its universal agent language; the code is MIT,
+> the name, the profile tokens and the conformance mark are Wildhaven's: an implementation may call itself
+> LisPy only if it passes `lispy-conformance@2`. Every other dialect that has worn the name has a status in
+> [`VOCABULARY.md`](VOCABULARY.md) (alias, staging, retiring); none is deleted, none is LisPy.
+> First production use: the RAPP Brainstem kernel in [`examples/brainstem-kernel/`](examples/brainstem-kernel/).
+<!-- canonical-notice:end -->
 
 # LisPy
 
@@ -159,7 +165,7 @@ LisPy denies arbitrary filesystem access and Python execution by default.
 Trusted local scripts can opt in explicitly:
 
 ```bash
-python3 lisp.py --trusted script.lisp
+python3 lisp.py --trusted script.lispy
 ```
 
 Use `(capabilities)`, `(runtime-info)`, or `(builtin-manifest)` to inspect the
@@ -538,7 +544,7 @@ in the Python runtime and are not conformance-tested here:
 ```
 
 - **Status:** External and unverified
-- **License:** MIT
+- **License:** MIT (code). The LisPy name, profile tokens and conformance mark: Wildhaven Homes LLC
 - **Author:** Kody Wildfeuer
 - **Built:** Weekend of March 22-23, 2026
 

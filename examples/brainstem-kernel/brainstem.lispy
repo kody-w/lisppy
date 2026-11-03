@@ -1,0 +1,136 @@
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; brainstem.lispy — the RAPP Brainstem kernel, written in LisPy (lispy-core@1, kody-w/lisppy).
+;;
+;; Same contract the Python grail serves (rapp/1 §8: POST /chat, GET /health, GET /version), as
+;; S-expressions. Every branch mirrors brainstem.py's /chat so the rapp-1 conformance oracle answers
+;; "identical" for every scenario. The host (lispy_host.py) adds exactly these bindings on top of the
+;; lispy-core@1 default profile (no trusted capabilities):
+;;   (model-call messages tools)       -> chat-completions response dict (raises on failure)
+;;   (model-call-safe messages tools)  -> response dict or ()
+;;   (json-parse-or-nil text)          -> parsed value or ()
+;;   (agents-load) (agents-tools) (agent-exists? name) (agent-perform name args) -> ("ok" text)|("error" text)
+;;   (soul) (soul-path) (model) (version) (voice-mode) (uuid)
+
+;; ── small helpers (LisPy has car/cdr; name the positions the kernel uses) ──
+(define second (lambda (xs) (car (cdr xs))))
+(define third (lambda (xs) (car (cdr (cdr xs)))))
+(define fourth (lambda (xs) (car (cdr (cdr (cdr xs))))))
+(define get-or (lambda (d k dflt) (if (has-key? d k) (get d k) dflt)))
+(define default (lambda (x d) (if (null? x) d x)))
+(define member? (lambda (x xs) (not (null? (filter (lambda (y) (equal? x y)) xs)))))
+(define present? (lambda (x) (and (not (null? x)) (not (equal? x #f)))))
+
+;; ── validation (the grail's order: body, user_input type, history, session, blank) ──
+(define validate-history
+  (lambda (value)
+    (cond
+      ((null? value) (list "ok" (list)))
+      ((not (list? value)) (list "err" "conversation_history must be an array"))
+      (else (validate-history-items value 0)))))
+
+(define validate-history-items
+  (lambda (items index)
+    (if (null? items)
+        (list "ok" (list))
+        (let ((m (car items)))
+          (cond
+            ((not (dict? m))
+             (list "err" (string-append "conversation_history[" (number->string index) "] must be an object")))
+            ((not (member? (get m "role") (list "user" "assistant" "tool")))
+             (list "err" (string-append "conversation_history[" (number->string index) "].role is invalid")))
+            ((not (string? (get m "content")))
+             (list "err" (string-append "conversation_history[" (number->string index) "].content must be a string")))
+            (else (validate-history-items (cdr items) (+ index 1))))))))
+
+;; ── one tool round (brainstem.py run_tool_calls): returns (list tool-messages logs) ──
+(define run-tool-calls
+  (lambda (calls)
+    (if (null? calls)
+        (list (list) (list))
+        (let* ((tc (car calls))
+               (fn (get tc "function"))
+               (name (get fn "name"))
+               (tc-id (get tc "id"))
+               (args (json-parse-or-nil (get-or fn "arguments" "{}")))
+               (outcome
+                 (cond
+                   ((not (dict? args))
+                    (list "Error: Tool arguments must be a valid JSON object."
+                          (string-append "[" name "] Error: Tool arguments must be a valid JSON object.")))
+                   ((agent-exists? name)
+                    (let ((r (agent-perform name args)))
+                      (if (equal? (car r) "ok")
+                          (list (second r) (string-append "[" name "] " (second r)))
+                          (list (string-append "Error: " (second r))
+                                (string-append "[" name "] ERROR: " (second r))))))
+                   (else (list (string-append "Agent '" name "' not found.")
+                               (string-append "Agent '" name "' not found.")))))
+               (tail (run-tool-calls (cdr calls))))
+          ;; append, not cons: lists that arrived as JSON are host lists, and cons would make an improper pair
+          (list (append (list (make-dict "tool_call_id" tc-id "role" "tool" "name" name "content" (car outcome)))
+                        (car tail))
+                (append (list (second outcome)) (second tail)))))))
+
+;; ── the tool loop: up to 3 rounds; returns (list messages last-msg logs responded-model) ──
+(define chat-rounds
+  (lambda (messages tools logs rounds-left)
+    (let* ((response (model-call messages tools))
+           (choice (car (get response "choices")))
+           (msg (get choice "message"))
+           (messages2 (append messages (list msg)))
+           (calls (get msg "tool_calls")))
+      (if (present? calls)
+          (let ((ran (run-tool-calls calls)))
+            (if (> rounds-left 1)
+                (chat-rounds (append messages2 (car ran)) tools (append logs (second ran)) (- rounds-left 1))
+                (list (append messages2 (car ran)) msg (append logs (second ran)) (get response "model"))))
+          (list messages2 msg logs (get response "model"))))))
+
+;; the model can still be asking for tools when the 3-round budget runs out: one tool-less completion
+(define final-reply
+  (lambda (messages msg)
+    (if (present? (get msg "tool_calls"))
+        (let* ((final (model-call-safe messages (list)))
+               (text (if (null? final)
+                         ""
+                         (string-trim (default (get (get (car (get final "choices")) "message") "content") "")))))
+          (if (equal? text "")
+              "I couldn't finish that within the available tool steps. Try rephrasing, or breaking it into smaller steps."
+              text))
+        (default (get msg "content") ""))))
+
+;; ── POST /chat → (list status-code body) ──
+(define handle-chat
+  (lambda (data)
+    (cond
+      ((not (dict? data)) (list 400 (make-dict "error" "Request body must be a JSON object")))
+      ((not (string? (get-or data "user_input" ""))) (list 400 (make-dict "error" "user_input must be a string")))
+      (else
+        (let* ((user-input (string-trim (get-or data "user_input" "")))
+               (hv (validate-history (get-or data "conversation_history" (list))))
+               (session-id (default (get data "session_id") (uuid))))
+          (cond
+            ((equal? (car hv) "err") (list 400 (make-dict "error" (second hv))))
+            ((equal? user-input "") (list 400 (make-dict "error" "user_input is required")))
+            (else
+              (let* ((history (filter (lambda (m) (member? (get m "role") (list "user" "assistant" "tool")))
+                                      (get-or data "conversation_history" (list))))
+                     (messages (append (list (make-dict "role" "system" "content" (soul)))
+                                       history
+                                       (list (make-dict "role" "user" "content" user-input))))
+                     (run (chat-rounds messages (agents-tools) (list) 3))
+                     (reply (final-reply (car run) (second run))))
+                (list 200 (make-dict "response" reply
+                                     "session_id" session-id
+                                     "agent_logs" (string-join (third run) "\n")
+                                     "voice_mode" (voice-mode)
+                                     "model" (default (fourth run) (model))
+                                     "requested_model" (model)))))))))))
+
+;; ── GET /health, GET /version ──
+(define handle-health
+  (lambda ()
+    (list 200 (make-dict "status" "ok" "version" (version) "model" (model) "voice_mode" (voice-mode)
+                         "soul" (soul-path) "agents" (agents-load) "kernel" "lispy"))))
+
+(define handle-version (lambda () (list 200 (make-dict "version" (version)))))

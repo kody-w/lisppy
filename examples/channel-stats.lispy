@@ -1,4 +1,5 @@
-;; channel-stats.lisp — Analyze channel distribution across the platform
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; channel-stats.lispy — Analyze channel distribution across the platform
 ;;
 ;; Usage: python3 lisp.py --state-dir examples/sample-state examples/channel-stats.lisp
 

@@ -42,7 +42,7 @@ from typing import Any
 # Configuration
 # ---------------------------------------------------------------------------
 
-VERSION = "0.24.0"
+VERSION = "0.25.0"
 LANGUAGE_PROFILE = "lispy-core@1"
 DISTRIBUTION_NAME = "rappterbook-lispy-runtime"
 REPO_ROOT = Path(__file__).resolve().parent
@@ -889,6 +889,50 @@ def display_value(val: Any) -> str:
     if isinstance(val, str) and not isinstance(val, Symbol):
         return val
     return _value_repr(val)
+
+
+# ---------------------------------------------------------------------------
+# Canonical form and program identity (lispy-core@1)
+# ---------------------------------------------------------------------------
+
+TEACH_PATH = REPO_ROOT / "llms.txt"
+MAGIC_LINE = ";; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt"
+
+
+def _canonical_form(val: Any) -> str:
+    """Print one parsed form so that reformatting never changes the text (nil and () stay distinct)."""
+    if val is NIL:
+        return "nil"
+    if isinstance(val, Symbol):
+        return str(val)
+    if isinstance(val, bool):
+        return "#t" if val else "#f"
+    if isinstance(val, str):
+        return json.dumps(val, ensure_ascii=False)
+    if isinstance(val, (int, float)):
+        return repr(val)
+    if isinstance(val, list):
+        return "(" + " ".join(_canonical_form(x) for x in val) + ")"
+    if isinstance(val, Pair):
+        items, cur = [], val
+        while isinstance(cur, Pair):
+            items.append(_canonical_form(cur.car))
+            cur = cur.cdr
+        tail = "" if cur is NIL else " . " + _canonical_form(cur)
+        return "(" + " ".join(items) + tail + ")"
+    return _value_repr(val)
+
+
+def canonical_source(source: str, *, source_name: str = "<string>") -> str:
+    """The canonical text of a program: parsed, comments and layout removed, one form per line."""
+    forms = parse(source, source_name=source_name)
+    return "".join(_canonical_form(f) + "\n" for f in forms)
+
+
+def program_identity(source: str, *, source_name: str = "<string>") -> str:
+    """sha256 of the canonical form, written with its algorithm so a future hash can alias it."""
+    text = canonical_source(source, source_name=source_name)
+    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 # ---------------------------------------------------------------------------
@@ -1740,7 +1784,7 @@ def make_global_env(
     env["negative?"] = lambda x: _real_number(x) < 0
 
     # -- List operations --
-    env["cons"] = lambda a, b: Pair(a, b)
+    env["cons"] = _cons
     env["car"] = lambda x: _car(x)
     env["cdr"] = lambda x: _cdr(x)
     env["list"] = lambda *args: _list_fn(env.context, *args)
@@ -2050,6 +2094,14 @@ def _raise_error(msg):
 
 def _is_truthy(value):
     return CORE1_VALUES.truthy(value)
+
+
+def _cons(a, b):
+    """(cons a b). A JSON-born host list is a proper list everywhere else in LisPy (car, cdr, length,
+    append), so consing onto one yields a proper list too, never an improper pair (0.25.0)."""
+    if isinstance(b, list):
+        return [a, *b]
+    return Pair(a, b)
 
 
 def _car(x):
@@ -3473,7 +3525,7 @@ def _validate_mars_governor(_inputs, outputs):
 def _registered_sources():
     definitions = {
         "mars-barn/governor-example": {
-            "path": REPO_ROOT / "examples" / "mars-barn" / "mars-colony-governor.lisp",
+            "path": REPO_ROOT / "examples" / "mars-barn" / "mars-colony-governor.lispy",
             "resource": "registered/mars-colony-governor.lisp",
             "profile": "mars-governor-candidate@2",
             "contract_id": "mars-barn/governor-controls@1",
@@ -3488,7 +3540,7 @@ def _registered_sources():
             "effect_types": [],
         },
         "lispy/hosted-doctor@1": {
-            "path": REPO_ROOT / "examples" / "hosted-governor.lisp",
+            "path": REPO_ROOT / "examples" / "hosted-governor.lispy",
             "resource": "registered/hosted-governor.lisp",
             "profile": "hosted-governor@2",
             "contract_id": "mars-barn/governor-controls@1",
@@ -4347,6 +4399,7 @@ INSTALLED_REQUIRED_PATHS = (
     "lisppy/data/contracts/lispy-core@1/conformance.json",
     "lisppy/data/contracts/lispy-core@1/profile.json",
     "lisppy/data/contracts/lispy-core@1/stdlib.lisp",
+    "lisppy/data/llms.txt",
 )
 BUILD_INPUT_PATHS = (
     "MANIFEST.in",
@@ -5537,6 +5590,21 @@ def _argument_parser() -> argparse.ArgumentParser:
         help="read-only root for rb-state and related bindings",
     )
     parser.add_argument(
+        "--identity",
+        action="store_true",
+        help="print the program identity (sha256 of its canonical form) and exit",
+    )
+    parser.add_argument(
+        "--format",
+        action="store_true",
+        help="print the program in canonical form and exit",
+    )
+    parser.add_argument(
+        "--teach",
+        action="store_true",
+        help="print llms.txt, the one page that teaches the whole language, and exit",
+    )
+    parser.add_argument(
         "--max-steps",
         type=_positive_int,
         default=None,
@@ -5678,6 +5746,21 @@ def _require_nonempty_option(parser, value, flag):
 
 
 def _dispatch_special_mode(args, parser):
+    if args.teach:
+        sys.stdout.write(_resource_text("llms.txt", TEACH_PATH))
+        return 0
+    if args.identity or args.format:
+        if args.expression is not None:
+            source, name = args.expression, "<eval>"
+        elif args.script:
+            source, name = Path(args.script).read_text(encoding="utf-8"), args.script
+        else:
+            parser.error("--identity/--format need a script or --eval")
+        if args.identity:
+            print(program_identity(source, source_name=name))
+        else:
+            sys.stdout.write(canonical_source(source, source_name=name))
+        return 0
     if args.worker_once:
         _reject_present_options(
             args,

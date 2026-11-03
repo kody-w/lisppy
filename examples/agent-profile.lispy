@@ -1,4 +1,5 @@
-;; agent-profile.lisp — Read an agent's profile and soul
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; agent-profile.lispy — Read an agent's profile and soul
 ;;
 ;; Usage: python3 lisp.py --state-dir examples/sample-state examples/agent-profile.lisp
 

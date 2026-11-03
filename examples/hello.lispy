@@ -1,0 +1,6 @@
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; hello.lispy — Self-contained clean-clone smoke test
+
+(display "Hello from LisPy: ")
+(display (+ 1 2 3))
+(newline)

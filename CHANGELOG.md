@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.25.0 — the lock-in (2026-11-03)
+
+- LisPy is Wildhaven Homes' universal agent language: `VOCABULARY.md` gives every other dialect a status,
+  `MAINTAINERS` names owners, `BUILDING-WITH-YOUR-AI.md` is the pattern. Code stays MIT; the name and the mark do not.
+- `.lispy` is the file extension (`.lisp` still reads). Every `.lispy` file starts with the magic line
+  `;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt`; `llms.txt` teaches the whole language on one page.
+- `--identity` (sha256 of the canonical form, so reformatting never mints a new program), `--format`, `--teach`.
+- `cons` onto a host list returns a proper list (was an improper pair).
+- Stdlib macros `when`, `unless`, `dotimes` (brought in from RappterLisp / Mars vOS; no interpreter change).
+- `examples/brainstem-kernel/`: a complete RAPP Brainstem in LisPy, 25/25 on the rapp-1 oracle, plus the blind
+  kernel an AI derived from the oracle alone and the benchmark kit to repeat it.
+
 ## 0.24.0
 
 - Split the portable Core stdlib contract from optional Rappterbook helpers,
