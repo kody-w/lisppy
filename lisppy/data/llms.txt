@@ -1,0 +1,43 @@
+LisPy  (lispy-core@1)  — the whole language on one page.   Source: https://github.com/kody-w/lisppy
+What you remember about LisPy is not the law. This page is. The corpus (spec/v1/conformance.json) beats this page.
+A .lispy file begins:  ;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt     (line 1 names its law)
+Run:  python3 lisp.py file.lispy | -e '(+ 1 2)' | --identity file.lispy | --format file.lispy | --teach
+Deterministic by rule: core has no clock, random, file or network. Budgets: 100000 steps, call depth 128
+(a budget so a runaway stops, not a style). Ints are exact and unbounded; floats are IEEE-754 doubles.
+
+SYNTAX   (f a b) calls f.  'x = (quote x).  ;; comment.  "str" escapes: \" \\ \n \t only (\r stays two chars).  #t #f  nil
+TRUTH    Only #f and nil are false.  "" and 0 are TRUE.  Two empties: nil (false; also what the bare form ()
+         evaluates to, and what (cdr (list 1)) and (get d "missing") return; json-dump gives null) and the
+         empty LIST (true: (list) or '(); json-dump gives []). (null? x) is #t for both; (list? nil) is #f.
+FORMS    quote if cond define set! lambda let let* begin and or define-macro   — that is all of them.
+         (define x 1)  (define (f a . rest) body...)  (set! x 2)  (lambda (a b) ...)  (lambda args ...)
+         (if test then else)  (cond (test e) (else e))  (let ((a 1) (b 2)) ...) is parallel; let* is sequential
+         (and ...) (or ...) return the deciding value.  (begin e1 e2) returns the last.  `do` is an ERROR: use begin.
+         (define-macro (unless test . body) (list 'if test nil (cons 'begin body)))
+STDLIB   (when t . body) (unless t . body) (dotimes n . body) identity constantly complement partial
+LISTS    (list ...) (cons x lst) car cdr (length l) (append l1 l2 ...) reverse (map f l) (filter p l) (for-each f l)
+         (apply f l) (sort l) ascending (range n) (take l n) (drop l n) (nth l i) 0-based (zip l1 l2) null? pair? list?
+         (reduce (lambda (acc x) ...) l init)   (car (list)) is an error.
+DICTS    (make-dict "k" v ...)  (get d "k")  (get d "k" default)  (dict-set d "k" v) returns a NEW dict
+         keys values (dict-map (lambda (k v) ...) d)  dict?
+STRINGS  (string-append a b ...) (string-split s sep) keeps empties (string-join l sep) (substring s start end) end
+         exclusive (string-length s) = code points (string-contains? hay needle) (string-ref s i) -> 1-char string
+         (string-trim s) ASCII whitespace string-upcase string->number number->string string->symbol symbol->string
+NUMBERS  + - * / = < > <= >= abs min max mod floor round   (= 1 1.0) is #t  (= 1 "1") is #f  (/ 1 3) is 0.333…
+PREDS    number? string? symbol? list? dict? procedure? boolean? equal? eq? not
+JSON     (json-parse s) <-> (json-dump v): list<->array, dict<->object, nil<->null. lispy-value@1 IS JSON.
+ERRORS   (error "msg") stops with a category; the host gets {ok:false, error:{category, message}}. Refuse, never repair.
+HOST     Python gives you bindings and takes the result; nothing from a model or the net is ever evaluated as code.
+         Embed: import lisp as L; env = L.make_global_env(); env["name"] = python_callable;
+         L.run_string(source, env); value = L.lisp_to_json(L.run_string("(handle-chat *request*)", env))
+         with env["*request*"] = L.json_to_lisp(obj). A Brainstem host: examples/brainstem-kernel/lispy_host.py.
+AGENT    (lispy-agent@1, staging)  (define agent-name "x") (define agent-description "...")
+         (define agent-parameters (make-dict ...)) (define (agent-run context kwargs) ...)
+IDENTITY A program IS the sha256 of its canonical form (--identity); reformatting never changes it.
+NAMING   words-with-dashes; predicates end in ?; mutation ends in !; string- dict- prefixes.
+PROVE    python3 -m unittest discover -s tests.  Every bug becomes a corpus entry.  The corpus is the spec.
+WATER    No native host. On a browser, phone or chip an AI derives an interpreter from THIS page + the corpus in
+         the host's own language; it is LisPy only when it passes lispy-conformance@2. Never hand-ported.
+BUILD WITH YOUR AI   say the taste → the AI writes the oracle (expected.json) first → builds blind to pass it →
+         you touch the live thing → new nouns get a status in VOCABULARY.md → lessons go in the handbook →
+         a stranger holding only this page continues.   (BUILDING-WITH-YOUR-AI.md)

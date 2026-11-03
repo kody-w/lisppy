@@ -21,7 +21,7 @@ class ExampleTests(unittest.TestCase):
     def test_manifest_covers_every_lisp_example(self):
         discovered = {
             str(path.relative_to(ROOT))
-            for path in (ROOT / "examples").rglob("*.lisp")
+            for path in (ROOT / "examples").rglob("*.lispy")
         }
         discovered.add("examples/hosted-flow.py")
         declared = {item["path"] for item in self.manifest["examples"]}
@@ -49,12 +49,12 @@ class ExampleTests(unittest.TestCase):
 
     def test_python_examples_run_deterministically(self):
         expected = {
-            "examples/hello.lisp": "Hello from LisPy: 6",
-            "examples/agent-profile.lisp": "Soul: Socrates 2.0",
-            "examples/channel-stats.lisp": "Total: 2 channels, 18 posts",
-            "examples/data-slosh.lisp": "The REPL is the Heartbeat",
-            "examples/frame-eval.lisp": "Frame complete",
-            "examples/trending.lisp": "2 trending posts total",
+            "examples/hello.lispy": "Hello from LisPy: 6",
+            "examples/agent-profile.lispy": "Soul: Socrates 2.0",
+            "examples/channel-stats.lispy": "Total: 2 channels, 18 posts",
+            "examples/data-slosh.lispy": "The REPL is the Heartbeat",
+            "examples/frame-eval.lispy": "Frame complete",
+            "examples/trending.lispy": "2 trending posts total",
         }
         for item in self.manifest["examples"]:
             if item["runtime"] != "python-cli":
@@ -114,7 +114,7 @@ class ExampleTests(unittest.TestCase):
         self.assertEqual(len(external), 2)
         candidate = next(
             item for item in mars
-            if item["path"].endswith("mars-colony-governor.lisp")
+            if item["path"].endswith("mars-colony-governor.lispy")
         )
         self.assertEqual(candidate["proof"], "local-executed")
         self.assertEqual(candidate["external_status"], "unverified")

@@ -14,7 +14,7 @@ import lisp
 
 
 GOVERNOR = (
-    ROOT / "examples" / "mars-barn" / "mars-colony-governor.lisp"
+    ROOT / "examples" / "mars-barn" / "mars-colony-governor.lispy"
 ).read_text(encoding="utf-8")
 INPUTS = {
     "sol": 1,

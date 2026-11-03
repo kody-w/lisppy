@@ -1,4 +1,5 @@
-;; browser-scraper.lisp — Drive the vOS headless browser from LisPy
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; browser-scraper.lispy — Drive the vOS headless browser from LisPy
 ;;
 ;; The vOS browser engine fetches URLs, parses HTML into a virtual DOM,
 ;; and renders results in a GUI iframe window. This program drives it.

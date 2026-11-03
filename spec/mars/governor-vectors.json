@@ -1,7 +1,7 @@
 {
   "schema": "lispy.mars-governor-vectors/v1",
   "contract_id": "mars-barn/governor-controls@1",
-  "source_sha256": "4c4ecd02337f42d06b25a5ace3a92c2be13c6f570c8047985fafce8fcaab5779",
+  "source_sha256": "1ded776314cfaea9312fa3c27aba78968d515e0f4bd16ee20f65b0025692b581",
   "initial_outputs": {
     "heating_alloc": 0.25,
     "isru_alloc": 0.4,

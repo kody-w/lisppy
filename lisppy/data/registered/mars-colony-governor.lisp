@@ -1,4 +1,5 @@
-;; mars-colony-governor.lisp — Colony resource allocation governor
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; mars-colony-governor.lispy — Colony resource allocation governor
 ;;
 ;; Locally executed as a Python-hosted governor candidate. Compatibility with
 ;; the external Mars Barn viewer dialect is not established in this repository.

@@ -34,45 +34,50 @@
     "mars-score-preview-external@1": {
       "runtime": "mars-barn-sim",
       "proof": "external-unverified"
+    },
+    "brainstem-kernel@1": {
+      "runtime": "brainstem-host",
+      "proof": "local-executed",
+      "oracle": "kody-w/rapp-1 conformance/grail (25 scenarios)"
     }
   },
   "examples": [
     {
-      "path": "examples/hello.lisp",
+      "path": "examples/hello.lispy",
       "runtime": "python-cli",
       "profile": "lispy-core@1",
       "proof": "local-executed"
     },
     {
-      "path": "examples/agent-profile.lisp",
+      "path": "examples/agent-profile.lispy",
       "runtime": "python-cli",
       "profile": "lispy-core@1+rappterbook.read",
       "proof": "local-executed",
       "state_dir": "examples/sample-state"
     },
     {
-      "path": "examples/channel-stats.lisp",
+      "path": "examples/channel-stats.lispy",
       "runtime": "python-cli",
       "profile": "lispy-core@1+rappterbook.read",
       "proof": "local-executed",
       "state_dir": "examples/sample-state"
     },
     {
-      "path": "examples/data-slosh.lisp",
+      "path": "examples/data-slosh.lispy",
       "runtime": "python-cli",
       "profile": "lispy-core@1+rappterbook.read",
       "proof": "local-executed",
       "state_dir": "examples/sample-state"
     },
     {
-      "path": "examples/frame-eval.lisp",
+      "path": "examples/frame-eval.lispy",
       "runtime": "python-cli",
       "profile": "lispy-core@1+rappterbook.read",
       "proof": "local-executed",
       "state_dir": "examples/sample-state"
     },
     {
-      "path": "examples/trending.lisp",
+      "path": "examples/trending.lispy",
       "runtime": "python-cli",
       "profile": "lispy-core@1+rappterbook.read",
       "proof": "local-executed",
@@ -85,7 +90,7 @@
       "proof": "local-executed"
     },
     {
-      "path": "examples/hosted-governor.lisp",
+      "path": "examples/hosted-governor.lispy",
       "runtime": "python-hosted",
       "profile": "hosted-governor@2",
       "proof": "local-executed",
@@ -93,19 +98,19 @@
       "contract_id": "mars-barn/governor-controls@1"
     },
     {
-      "path": "examples/mars-barn/browser-scraper.lisp",
+      "path": "examples/mars-barn/browser-scraper.lispy",
       "runtime": "mars-barn-vos",
       "profile": "mars-browser-external@1",
       "proof": "external-unverified"
     },
     {
-      "path": "examples/mars-barn/gauntlet-runner.lisp",
+      "path": "examples/mars-barn/gauntlet-runner.lispy",
       "runtime": "mars-barn-sim",
       "profile": "mars-score-preview-external@1",
       "proof": "external-unverified"
     },
     {
-      "path": "examples/mars-barn/mars-colony-governor.lisp",
+      "path": "examples/mars-barn/mars-colony-governor.lispy",
       "runtime": "python-hosted",
       "profile": "mars-governor-candidate@2",
       "proof": "local-executed",
@@ -115,6 +120,20 @@
       "vectors": "spec/mars/governor-vectors.json",
       "external_target": "mars-barn-viewer",
       "external_status": "unverified"
+    },
+    {
+      "path": "examples/brainstem-kernel/brainstem.lispy",
+      "runtime": "brainstem-host",
+      "profile": "brainstem-kernel@1",
+      "proof": "local-executed",
+      "note": "the RAPP Brainstem kernel in LisPy"
+    },
+    {
+      "path": "examples/brainstem-kernel/brainstem.blind.lispy",
+      "runtime": "brainstem-host",
+      "profile": "brainstem-kernel@1",
+      "proof": "local-executed",
+      "note": "kernel an AI derived from the oracle alone"
     }
   ]
 }

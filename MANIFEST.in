@@ -10,7 +10,7 @@ include rapp-compliance.json
 include .github/scripts/verify_testpypi.py
 include .github/workflows/publish.yml
 include .github/workflows/tests.yml
-recursive-include examples *.lisp *.json *.md *.py
+recursive-include examples *.lispy *.lisp *.json *.md *.py
 recursive-include agents *.py
 recursive-include docs *.html *.md
 recursive-include tools *.py

@@ -1,4 +1,5 @@
-;; gauntlet-runner.lisp — External gauntlet score preview
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; gauntlet-runner.lispy — External gauntlet score preview
 ;;
 ;; This computes a single-state projection. It does not invoke or prove the
 ;; external Monte Carlo gauntlet.

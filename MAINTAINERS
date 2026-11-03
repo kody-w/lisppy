@@ -1,0 +1,20 @@
+# MAINTAINERS — LisPy (kody-w/lisppy)
+
+LisPy is owned and operated by Wildhaven Homes LLC. One final say; named owners per area (the Linux playbook).
+Writes land only through a merged pull request. `lispy-core@1` is frozen: changes to its semantics are refused;
+new behaviour is a new profile (`@2`).
+
+| Area | Owner | Notes |
+|---|---|---|
+| Language semantics, profile tokens, the name and conformance mark | Kody Wildfeuer (@kody-w) | final say |
+| Reference implementation `lisp.py` (fixes only; no new forms) | Kody Wildfeuer (@kody-w) · AI lane: Claude (Fable 5.1) | every change ships with a conformance vector |
+| Conformance corpus `spec/v1/conformance.json` | Kody Wildfeuer (@kody-w) | the corpus is the spec; additions only |
+| `examples/brainstem-kernel/` (first production use, benchmark kit) | AI lane: Claude · muscle: Copilot CLI Sol | gated by kody-w/rapp-1 `conformance/grail` |
+| `VOCABULARY.md` statuses | Kody Wildfeuer (@kody-w) | retiring needs a measured zero-use check |
+
+## Succession and lapse (the hundred-year clause)
+
+Successor steward: named by Kody Wildfeuer in a signed commit to this file; until then, Wildhaven Homes LLC.
+Lapse: if no steward merges a conformance change or answers a conformance claim for five years, the name and the
+mark pass to whoever keeps `spec/v1/conformance.json` green in public, with this file's history as the record
+(written in advance so the OpenJDK outcome never needs a lawsuit).

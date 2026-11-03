@@ -1,4 +1,5 @@
-;; hosted-governor.lisp — Manifest-bound worker and replay proof
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; hosted-governor.lispy — Manifest-bound worker and replay proof
 
 (begin
   (if (> isru_alloc 0.80)

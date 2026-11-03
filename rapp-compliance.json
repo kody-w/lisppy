@@ -3,7 +3,7 @@
   "project": {
     "name": "LisPy",
     "repository": "kody-w/lisppy",
-    "version": "0.24.0",
+    "version": "0.25.0",
     "public_twin": "https://github.com/kody-w/lisppy",
     "development_base_commit": "b665d1067097193c5ca57716a236e722ed328547",
     "release_status": "candidate-unreleased"

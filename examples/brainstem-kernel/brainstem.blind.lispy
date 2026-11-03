@@ -1,0 +1,135 @@
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; Derived only from the local oracle and host contract.
+(define (error-response text)
+  (list 400 (make-dict "error" text)))
+
+(define (history-error history index)
+  (cond
+    ((null? history) "")
+    (#t
+      (let* ((item (car history))
+             (prefix (string-append "conversation_history["
+                       (number->string index) "]")))
+        (cond
+          ((not (dict? item)) (string-append prefix " must be an object"))
+          ((not (or (equal? (get item "role") "user")
+                    (equal? (get item "role") "assistant")))
+            (string-append prefix ".role is invalid"))
+          ((not (string? (get item "content")))
+            (string-append prefix ".content must be a string"))
+          (#t (history-error (cdr history) (+ index 1))))))))
+
+;; Accept either a completion envelope or an already-unwrapped message.
+(define (completion-message completion)
+  (cond
+    ((has-key? completion "choices")
+      (get (car (get completion "choices")) "message"))
+    (#t completion)))
+
+(define (tool-result name arguments)
+  (cond
+    ((not (agent-exists? name))
+      (let* ((text (string-append "Agent '" name "' not found.")))
+        (list text text)))
+    ((not (dict? arguments))
+      (let* ((text "Error: Tool arguments must be a valid JSON object."))
+        (list text (string-append "[" name "] " text))))
+    (#t
+      (let* ((result (agent-perform name arguments))
+             (text (car (cdr result))))
+        (cond
+          ((equal? (car result) "ok")
+            (list text (string-append "[" name "] " text)))
+          (#t
+            (list (string-append "Error: " text)
+                  (string-append "[" name "] ERROR: " text))))))))
+
+(define (perform-tools calls messages logs)
+  (cond
+    ((null? calls) (list messages logs))
+    (#t
+      (let* ((call (car calls))
+             (function (get call "function"))
+             (result (tool-result (get function "name")
+                       (json-parse-or-nil (get function "arguments"))))
+             (message (make-dict "role" "tool"
+                        "tool_call_id" (get call "id")
+                        "content" (car result))))
+        (perform-tools (cdr calls)
+          (append messages (list message))
+          (append logs (list (car (cdr result)))))))))
+
+(define (final-completion messages logs)
+  (let* ((completion (model-call-safe messages (list)))
+         (message (cond ((dict? completion) (completion-message completion))
+                        (#t (make-dict))))
+         (text (get message "content")))
+    (list
+      (cond
+        ((and (string? text) (not (equal? (string-trim text) ""))) text)
+        (#t "I couldn't finish that within the available tool steps. Try rephrasing, or breaking it into smaller steps."))
+      logs)))
+
+(define (tool-loop messages tools rounds logs)
+  (cond
+    ((null? rounds) (final-completion messages logs))
+    (#t
+      (let* ((message (completion-message (model-call messages tools)))
+             (calls (get message "tool_calls")))
+        (cond
+          ((null? calls)
+            (list (get message "content") logs))
+          (#t
+            (let* ((state (perform-tools calls
+                           (append messages (list message)) logs)))
+              (tool-loop (car state) tools (cdr rounds)
+                         (car (cdr state))))))))))
+
+(define (chat-response request input history)
+  (let* ((messages
+           (append
+             (list (make-dict "role" "system" "content" (soul)))
+             history
+             (list (make-dict "role" "user" "content" input))))
+         (result (tool-loop messages (agents-tools) (list 1 2 3) (list)))
+         (session (get request "session_id")))
+    (list 200
+      (make-dict
+        "response" (car result)
+        "agent_logs" (string-join (car (cdr result)) "\n")
+        "session_id" (cond
+                       ((and (string? session) (not (equal? session ""))) session)
+                       (#t (uuid)))
+        "model" (model)
+        "requested_model" (model)
+        "voice_mode" (voice-mode)))))
+
+(define (handle-chat request)
+  (cond
+    ((not (dict? request))
+      (error-response "Request body must be a JSON object"))
+    (#t
+      (let* ((input (cond ((has-key? request "user_input")
+                           (get request "user_input"))
+                          (#t "")))
+             (history (cond ((has-key? request "conversation_history")
+                             (get request "conversation_history"))
+                            (#t (list)))))
+        (cond
+          ((not (string? input))
+            (error-response "user_input must be a string"))
+          ((not (list? history))
+            (error-response "conversation_history must be an array"))
+          (#t
+            (let* ((invalid (history-error history 0)))
+              (cond
+                ((not (equal? invalid "")) (error-response invalid))
+                ((equal? (string-trim input) "")
+                  (error-response "user_input is required"))
+                (#t (chat-response request (string-trim input) history))))))))))
+
+(define (handle-health)
+  (list 200 (make-dict "status" "ok" "agents" (sort (agents-load)))))
+
+(define (handle-version)
+  (list 200 (make-dict "version" (version))))

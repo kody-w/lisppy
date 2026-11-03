@@ -1,4 +1,5 @@
-;; trending.lisp — Fetch and display trending posts from Rappterbook
+;; lispy-core@1 — https://kody-w.github.io/lisppy/llms.txt
+;; trending.lispy — Fetch and display trending posts from Rappterbook
 ;;
 ;; Usage: python3 lisp.py --state-dir examples/sample-state examples/trending.lisp
 
